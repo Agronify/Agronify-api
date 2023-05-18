@@ -35,11 +35,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.prisma = void 0;
+const client_1 = require("@prisma/client");
 const predict_1 = __importDefault(require("./routes/predict"));
 const upload_1 = __importDefault(require("./routes/upload"));
 const weather_1 = __importDefault(require("./routes/weather"));
 const server_1 = require("./server");
 const dotenv = __importStar(require("dotenv"));
+const knowledge_1 = __importDefault(require("./routes/knowledge"));
+exports.prisma = new client_1.PrismaClient();
 dotenv.config();
 (0, server_1.init)().then((server) => __awaiter(void 0, void 0, void 0, function* () {
     server.route({
@@ -68,6 +72,26 @@ dotenv.config();
         method: 'POST',
         path: '/v1/predict',
         handler: predict_1.default.post
+    });
+    server.route({
+        method: 'GET',
+        path: '/v1/knowledge/{id?}',
+        handler: knowledge_1.default.get
+    });
+    server.route({
+        method: 'POST',
+        path: '/v1/knowledge',
+        handler: knowledge_1.default.post
+    });
+    server.route({
+        method: 'PUT',
+        path: '/v1/knowledge/{id}',
+        handler: knowledge_1.default.put
+    });
+    server.route({
+        method: 'DELETE',
+        path: '/v1/knowledge/{id}',
+        handler: knowledge_1.default.delete
     });
     (0, server_1.start)();
 }));

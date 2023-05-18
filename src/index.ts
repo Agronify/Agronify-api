@@ -1,9 +1,15 @@
+import { PrismaClient } from "@prisma/client";
 import Predict from "./routes/predict";
 import Upload from "./routes/upload";
 import Weather from "./routes/weather";
 import { init, start } from "./server";
 
 import * as dotenv from 'dotenv'
+import Knowledge from "./routes/knowledge";
+
+export const prisma = new PrismaClient()
+
+
 dotenv.config()
 init().then(async (server) => {
     server.route({
@@ -11,6 +17,7 @@ init().then(async (server) => {
         path: '/v1/weather',
         handler: Weather.get
     });
+
     server.route({
         method: 'POST',
         path: '/v1/upload',
@@ -23,15 +30,39 @@ init().then(async (server) => {
         },
         handler: Upload.upload
     });
+
     server.route({
         method: 'GET',
         path: '/v1/files/{path}',
         handler: Upload.get
     });
+
     server.route({
         method: 'POST',
         path: '/v1/predict',
         handler: Predict.post
     });
+
+    server.route({
+        method: 'GET',
+        path: '/v1/knowledge/{id?}',
+        handler: Knowledge.get
+    });
+    server.route({
+        method: 'POST',
+        path: '/v1/knowledge',
+        handler: Knowledge.post
+    });
+    server.route({
+        method: 'PUT',
+        path: '/v1/knowledge/{id}',
+        handler: Knowledge.put
+    });
+    server.route({
+        method: 'DELETE',
+        path: '/v1/knowledge/{id}',
+        handler: Knowledge.delete
+    });
+
     start();
 });
