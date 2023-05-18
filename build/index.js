@@ -37,12 +37,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.prisma = void 0;
 const client_1 = require("@prisma/client");
-const predict_1 = __importDefault(require("./routes/predict"));
-const upload_1 = __importDefault(require("./routes/upload"));
-const weather_1 = __importDefault(require("./routes/weather"));
+const predict_1 = __importDefault(require("./handler/predict"));
+const upload_1 = __importDefault(require("./handler/upload"));
+const weather_1 = __importDefault(require("./handler/weather"));
 const server_1 = require("./server");
 const dotenv = __importStar(require("dotenv"));
-const knowledge_1 = __importDefault(require("./routes/knowledge"));
+const knowledge_1 = __importDefault(require("./handler/knowledge"));
 exports.prisma = new client_1.PrismaClient();
 dotenv.config();
 (0, server_1.init)().then((server) => __awaiter(void 0, void 0, void 0, function* () {

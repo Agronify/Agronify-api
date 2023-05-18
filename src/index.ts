@@ -1,11 +1,11 @@
 import { PrismaClient } from "@prisma/client";
-import Predict from "./routes/predict";
-import Upload from "./routes/upload";
-import Weather from "./routes/weather";
+import Predict from "./handler/predict";
+import Upload from "./handler/upload";
+import Weather from "./handler/weather";
 import { init, start } from "./server";
 
 import * as dotenv from 'dotenv'
-import Knowledge from "./routes/knowledge";
+import Knowledge from "./handler/knowledge";
 
 export const prisma = new PrismaClient()
 
