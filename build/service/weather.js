@@ -19,13 +19,13 @@ class WeatherService {
         this.lon = lon;
         this.tz = tz;
     }
-    getCurrentWeather() {
+    getCurrent() {
         return __awaiter(this, void 0, void 0, function* () {
             let res = yield axios_1.default.get(`https://api.open-meteo.com/v1/forecast?latitude=${this.lat}&longitude=${this.lon}&current_weather=true&timezone=${this.tz}`);
             return res.data;
         });
     }
-    getForecastWeather() {
+    getForecast() {
         return __awaiter(this, void 0, void 0, function* () {
             let res = yield axios_1.default.get(`https://api.open-meteo.com/v1/forecast?latitude=${this.lat}&longitude=${this.lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,precipitation_probability_max&timezone=${this.tz}`);
             return res.data;

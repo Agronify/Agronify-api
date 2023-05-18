@@ -14,17 +14,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const weather_1 = __importDefault(require("../service/weather"));
 class Weather {
-    static getWeather(request, response) {
+    static get(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
             let { lat, lon, tz, type } = request.query;
             let weatherService = new weather_1.default(lat, lon, tz);
             let weather = null;
             switch (type) {
                 case "current":
-                    weather = yield weatherService.getCurrentWeather();
+                    weather = yield weatherService.getCurrent();
                     break;
                 case "forecast":
-                    weather = yield weatherService.getForecastWeather();
+                    weather = yield weatherService.getForecast();
                 default:
                     break;
             }
