@@ -35,6 +35,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const predict_1 = __importDefault(require("./routes/predict"));
+const upload_1 = __importDefault(require("./routes/upload"));
 const weather_1 = __importDefault(require("./routes/weather"));
 const server_1 = require("./server");
 const dotenv = __importStar(require("dotenv"));
@@ -43,7 +45,29 @@ dotenv.config();
     server.route({
         method: 'GET',
         path: '/v1/weather',
-        handler: weather_1.default.getWeather
+        handler: weather_1.default.get
+    });
+    server.route({
+        method: 'POST',
+        path: '/v1/upload',
+        options: {
+            payload: {
+                parse: true,
+                allow: "multipart/form-data",
+                multipart: { output: "file" },
+            }
+        },
+        handler: upload_1.default.upload
+    });
+    server.route({
+        method: 'GET',
+        path: '/v1/files/{path}',
+        handler: upload_1.default.get
+    });
+    server.route({
+        method: 'POST',
+        path: '/v1/predict',
+        handler: predict_1.default.post
     });
     (0, server_1.start)();
 }));
