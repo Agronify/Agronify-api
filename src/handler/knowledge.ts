@@ -39,9 +39,10 @@ export default class Knowledge {
     }
 
     public static async post(request: Request, response: ResponseToolkit) {
-        const { title, content, tags } = request.payload as any;
+        const { image, title, content, tags } = request.payload as any;
         const res = prisma.knowledge.create({
             data: {
+                image,
                 title,
                 content,
                 tags
@@ -52,12 +53,13 @@ export default class Knowledge {
     
     public static async put(request: Request, response: ResponseToolkit) {
         const { id } = request.params as any;
-        const { title, content, tags } = request.payload as any;
+        const { image, title, content, tags } = request.payload as any;
         const res = prisma.knowledge.update({
             where: {
                 id: parseInt(id)
             },
             data: {
+                image,
                 title,
                 content,
                 tags
