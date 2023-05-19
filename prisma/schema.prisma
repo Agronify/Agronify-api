@@ -22,10 +22,12 @@ model Crop {
   id          Int           @id @default(autoincrement())
   image       String
   name        String
+  type        String
   description String
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @default(now()) @updatedAt
   CropDisease CropDisease[]
+  MLModel     MLModel[]
 }
 
 model CropDisease {
@@ -37,4 +39,15 @@ model CropDisease {
   description String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now()) @updatedAt
+}
+
+model MLModel {
+  id      Int     @id @default(autoincrement())
+  crop    Crop    @relation(fields: [crop_id], references: [id])
+  crop_id Int
+  type    String
+  file    String
+  active  Boolean
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
