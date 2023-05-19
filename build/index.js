@@ -40,10 +40,14 @@ const client_1 = require("@prisma/client");
 const predict_1 = __importDefault(require("./handler/predict"));
 const upload_1 = __importDefault(require("./handler/upload"));
 const weather_1 = __importDefault(require("./handler/weather"));
+const crop_1 = __importDefault(require("./handler/crop"));
+const cropdisease_1 = __importDefault(require("./handler/cropdisease"));
 const server_1 = require("./server");
 const dotenv = __importStar(require("dotenv"));
 const knowledge_1 = __importDefault(require("./handler/knowledge"));
-exports.prisma = new client_1.PrismaClient();
+exports.prisma = new client_1.PrismaClient({
+// log: ["query", "info", "warn", "error"]
+});
 dotenv.config();
 (0, server_1.init)().then((server) => __awaiter(void 0, void 0, void 0, function* () {
     server.route({
@@ -65,34 +69,69 @@ dotenv.config();
         handler: upload_1.default.upload
     });
     server.route({
-        method: 'GET',
-        path: '/v1/files/{path}',
-        handler: upload_1.default.get
-    });
-    server.route({
         method: 'POST',
         path: '/v1/predict',
         handler: predict_1.default.post
     });
     server.route({
         method: 'GET',
-        path: '/v1/knowledge/{id?}',
+        path: '/v1/knowledges/{id?}',
         handler: knowledge_1.default.get
     });
     server.route({
         method: 'POST',
-        path: '/v1/knowledge',
+        path: '/v1/knowledges',
         handler: knowledge_1.default.post
     });
     server.route({
         method: 'PUT',
-        path: '/v1/knowledge/{id}',
+        path: '/v1/knowledges/{id}',
         handler: knowledge_1.default.put
     });
     server.route({
         method: 'DELETE',
-        path: '/v1/knowledge/{id}',
+        path: '/v1/knowledges/{id}',
         handler: knowledge_1.default.delete
+    });
+    server.route({
+        method: 'GET',
+        path: '/v1/crops/{id?}',
+        handler: crop_1.default.get
+    });
+    server.route({
+        method: 'POST',
+        path: '/v1/crops',
+        handler: crop_1.default.post
+    });
+    server.route({
+        method: 'PUT',
+        path: '/v1/crops/{id}',
+        handler: crop_1.default.put
+    });
+    server.route({
+        method: 'DELETE',
+        path: '/v1/crops/{id}',
+        handler: crop_1.default.delete
+    });
+    server.route({
+        method: 'GET',
+        path: '/v1/crops/{crop_id}/diseases/{id?}',
+        handler: cropdisease_1.default.get
+    });
+    server.route({
+        method: 'POST',
+        path: '/v1/crops/{crop_id}/diseases',
+        handler: cropdisease_1.default.post
+    });
+    server.route({
+        method: 'PUT',
+        path: '/v1/crops/{crop_id}/diseases/{id}',
+        handler: cropdisease_1.default.put
+    });
+    server.route({
+        method: 'DELETE',
+        path: '/v1/crops/{crop_id}/diseases/{id}',
+        handler: cropdisease_1.default.delete
     });
     (0, server_1.start)();
 }));

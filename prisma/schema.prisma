@@ -4,16 +4,37 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["fullTextSearch"]
 }
 
 model Knowledge {
   id        Int      @id @default(autoincrement())
-  image     String?
+  image     String
   title     String
   content   String
   tags      String[]
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+}
+
+model Crop {
+  id          Int           @id @default(autoincrement())
+  image       String
+  name        String
+  description String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @default(now()) @updatedAt
+  CropDisease CropDisease[]
+}
+
+model CropDisease {
+  id          Int      @id @default(autoincrement())
+  image       String
+  crop_id     Int
+  crop        Crop     @relation(fields: [crop_id], references: [id])
+  name        String
+  description String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
 }
