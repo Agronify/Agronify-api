@@ -25,6 +25,7 @@ init().then(async (server) => {
             payload: {
                 parse: true,
                 allow: "multipart/form-data",
+                maxBytes: 1024 * 1024 * 10,
 				multipart: { output: "file" },
             }
         },
