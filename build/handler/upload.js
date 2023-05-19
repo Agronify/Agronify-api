@@ -31,20 +31,35 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = __importStar(require("fs"));
-const mv_1 = __importDefault(require("mv"));
+const storage_1 = require("@google-cloud/storage");
 class Upload {
     static upload(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
             const { file } = request.payload;
             const filename = `${Date.now()}-${file.filename}`;
-            const path = `./uploads/${filename}`;
-            yield (0, mv_1.default)(file.path, path, (err) => { console.error(err); });
-            return response.response({ file: filename });
+            const blob = Upload.bucket.file("images/knowledge/" + filename);
+            const fileStream = fs.readFileSync(file.path);
+            const blobStream = blob.createWriteStream({
+                resumable: false
+            });
+            let done = false;
+            let error = false;
+            blobStream.on("finish", () => {
+                done = true;
+                blob.makePublic();
+            });
+            blobStream.on("error", (err) => {
+                done = true;
+                error = true;
+                console.log(err);
+            });
+            blobStream.end(Buffer.from(fileStream));
+            while (!done) {
+                yield new Promise((resolve) => setTimeout(resolve, 100));
+            }
+            return response.response(error ? { error: "Error uploading file" } : { image: blob.publicUrl() });
         });
     }
     static get(request, response) {
@@ -55,4 +70,6 @@ class Upload {
         });
     }
 }
+Upload.storage = new storage_1.Storage({ keyFilename: "./google-cloud-key.json" });
+Upload.bucket = Upload.storage.bucket("agronify_bucket");
 exports.default = Upload;

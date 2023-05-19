@@ -49,9 +49,10 @@ class Knowledge {
     }
     static post(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { title, content, tags } = request.payload;
+            const { image, title, content, tags } = request.payload;
             const res = __1.prisma.knowledge.create({
                 data: {
+                    image,
                     title,
                     content,
                     tags
@@ -63,12 +64,13 @@ class Knowledge {
     static put(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
             const { id } = request.params;
-            const { title, content, tags } = request.payload;
+            const { image, title, content, tags } = request.payload;
             const res = __1.prisma.knowledge.update({
                 where: {
                     id: parseInt(id)
                 },
                 data: {
+                    image,
                     title,
                     content,
                     tags

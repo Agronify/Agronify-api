@@ -58,7 +58,8 @@ dotenv.config();
             payload: {
                 parse: true,
                 allow: "multipart/form-data",
-                multipart: { output: "file" },
+                maxBytes: 1024 * 1024 * 10,
+                multipart: { output: "file" }
             }
         },
         handler: upload_1.default.upload
