@@ -35,25 +35,51 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.prisma = void 0;
+exports.bucket = exports.storage = exports.prisma = void 0;
 const client_1 = require("@prisma/client");
 const predict_1 = __importDefault(require("./handler/predict"));
 const upload_1 = __importDefault(require("./handler/upload"));
 const weather_1 = __importDefault(require("./handler/weather"));
 const crop_1 = __importDefault(require("./handler/crop"));
 const cropdisease_1 = __importDefault(require("./handler/cropdisease"));
+const mlmodel_1 = __importDefault(require("./handler/mlmodel"));
+const modelclass_1 = require("./handler/modelclass");
 const server_1 = require("./server");
+const storage_1 = require("@google-cloud/storage");
 const dotenv = __importStar(require("dotenv"));
 const knowledge_1 = __importDefault(require("./handler/knowledge"));
+const auth_1 = __importDefault(require("./handler/auth"));
+const user_1 = __importDefault(require("./handler/user"));
+const password_1 = require("./prisma_middleware/password");
 exports.prisma = new client_1.PrismaClient({
-// log: ["query", "info", "warn", "error"]
+    log: ["query", "info", "warn", "error"]
 });
+exports.prisma.$use(password_1.Encrypt);
+exports.storage = new storage_1.Storage({ keyFilename: "./google-cloud-key.json" });
+exports.bucket = exports.storage.bucket("agronify_bucket");
 dotenv.config();
 (0, server_1.init)().then((server) => __awaiter(void 0, void 0, void 0, function* () {
+    yield server.register(require('hapi-auth-jwt2'));
+    server.auth.strategy('jwt', 'jwt', {
+        key: process.env.JWT_SECRET,
+        validate: (decoded, request, h) => __awaiter(void 0, void 0, void 0, function* () {
+            const user = yield exports.prisma.user.findUnique({
+                where: {
+                    id: decoded.id
+                }
+            });
+            if (user) {
+                return { isValid: true };
+            }
+            else {
+                return { isValid: false };
+            }
+        })
+    });
     server.route({
         method: 'GET',
         path: '/v1/weather',
-        handler: weather_1.default.get
+        handler: weather_1.default.get,
     });
     server.route({
         method: 'POST',
@@ -62,7 +88,7 @@ dotenv.config();
             payload: {
                 parse: true,
                 allow: "multipart/form-data",
-                maxBytes: 1024 * 1024 * 10,
+                maxBytes: 1024 * 1024 * 20,
                 multipart: { output: "file" }
             }
         },
@@ -132,6 +158,76 @@ dotenv.config();
         method: 'DELETE',
         path: '/v1/crops/{crop_id}/diseases/{id}',
         handler: cropdisease_1.default.delete
+    });
+    server.route({
+        method: 'GET',
+        path: '/v1/models/{id?}',
+        handler: mlmodel_1.default.get
+    });
+    server.route({
+        method: 'POST',
+        path: '/v1/models',
+        handler: mlmodel_1.default.post
+    });
+    server.route({
+        method: 'PUT',
+        path: '/v1/models/{id}',
+        handler: mlmodel_1.default.put
+    });
+    server.route({
+        method: 'DELETE',
+        path: '/v1/models/{id}',
+        handler: mlmodel_1.default.delete
+    });
+    server.route({
+        method: 'GET',
+        path: '/v1/models/{mlmodel_id}/classes/{id?}',
+        handler: modelclass_1.ModelClass.get
+    });
+    server.route({
+        method: 'POST',
+        path: '/v1/models/{mlmodel_id}/classes',
+        handler: modelclass_1.ModelClass.post
+    });
+    server.route({
+        method: 'PUT',
+        path: '/v1/models/{mlmodel_id}/classes/{id}',
+        handler: modelclass_1.ModelClass.put
+    });
+    server.route({
+        method: 'DELETE',
+        path: '/v1/models/{mlmodel_id}/classes/{id}',
+        handler: modelclass_1.ModelClass.delete
+    });
+    server.route({
+        method: 'POST',
+        path: '/v1/auth/signin',
+        handler: auth_1.default.signin
+    });
+    server.route({
+        method: 'POST',
+        path: '/v1/auth/signup',
+        handler: auth_1.default.signup
+    });
+    server.route({
+        method: 'GET',
+        path: '/v1/users/{id?}',
+        handler: user_1.default.get
+    });
+    server.route({
+        method: 'POST',
+        path: '/v1/users',
+        handler: user_1.default.post
+    });
+    server.route({
+        method: 'PUT',
+        path: '/v1/users/{id}',
+        handler: user_1.default.put
+    });
+    server.route({
+        method: 'DELETE',
+        path: '/v1/users/{id}',
+        handler: user_1.default.delete
     });
     (0, server_1.start)();
 }));

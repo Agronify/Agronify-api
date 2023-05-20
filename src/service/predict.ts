@@ -1,12 +1,33 @@
+import * as tf from '@tensorflow/tfjs-node';
+import * as fs from 'fs';
+import { bucket, prisma } from '..';
+import { MLModel } from '@prisma/client';
 export default class PredictService{
     private path : string;
     private type : string;
     private name : string;
-
-    constructor(type: string, name: string, path: string){
+    private crop_id : number;
+    private model : Promise<tf.LayersModel>;
+    private mlModel : Promise<MLModel|null>;
+    constructor(type: string, name: string, crop_id: number, path: string){
         this.type = type;
         this.name = name;
         this.path = path;
+        this.crop_id = crop_id;
+        const fileModel = tf.io.fileSystem(`./models/${this.type}/${this.crop_id}/active/model.json`);
+        this.model = tf.loadLayersModel(fileModel);
+        this.mlModel = prisma.mLModel.findFirst({
+            where: {
+                AND: [
+                    {
+                        crop_id: this.crop_id
+                    },
+                    {
+                        active: true
+                    }
+                ]
+            }
+        });
     }
 
     public async predict(){
@@ -21,23 +42,38 @@ export default class PredictService{
     }
 
     public async disease(){
-        return new Promise((resolve, reject) => {
-            const time = Math.floor(Math.random() * 2000) + 1000;
-            const result = Math.floor(Math.random() * 100) + 1;
-            const confidence = Math.floor(Math.random() * 100) + 1;
-            setTimeout(() => {
-                resolve({
-                    path: this.path,
-                    result : result > 50 ? "healthy" : "unhealthy",
-                    confidence : confidence,
-                    disease : result > 50 ? {} : {
-                        name : "Bacterial Blight",
-                        description : "lorem ipsum dolor sit amet consectetur adipi scing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-                        treatment: "lorem ipsum dolor sit amet consectetur adipi scing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
-                    },
-                })
-            }, time);
-        })
+        const stream = await bucket.file(this.path).download()
+        const mlModel = await this.mlModel;
+        try {
+            const tensor = tf.node.decodeImage(stream[0], 3).reshape([1, 150, 150, 3])
+            const prediction = (await this.model).predict(tensor) as tf.Tensor<tf.Rank>;
+            const result = prediction.argMax(1).dataSync()[0];
+            const confidence = prediction.max(1).dataSync()[0] * 100;
+            const modelClass = await prisma.modelClass.findFirst({
+                where: {
+                    AND: [
+                        {
+                            index: result
+                        },
+                        {
+                            mlmodel_id: mlModel?.id
+                        }
+                    ]
+                },
+                include: {
+                    disease: true,
+                }
+            });
+            return {
+                path: this.path,
+                result: modelClass?.disease.name === "Healthy" ? "Healthy" : "unhealthy",
+                disease: modelClass?.disease.name === "Healthy" ? undefined : modelClass?.disease,
+                confidence: confidence
+            }
+        } catch (error) {
+            console.log(error)
+        }
+        return true;
     }
 
     public async ripeness(){

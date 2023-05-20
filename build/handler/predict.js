@@ -13,11 +13,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const predict_1 = __importDefault(require("../service/predict"));
+const __1 = require("..");
 class Predict {
     static post(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { type, name, path } = request.payload;
-            const predict = new predict_1.default(type, name, path);
+            const { type, crop_id, path } = request.payload;
+            const crop = yield __1.prisma.crop.findUnique({
+                where: {
+                    id: parseInt(crop_id)
+                }
+            });
+            if (!crop) {
+                return response.response({ error: "invalid crop_id" });
+            }
+            const predict = new predict_1.default(type, crop === null || crop === void 0 ? void 0 : crop.name, crop === null || crop === void 0 ? void 0 : crop.id, path);
             const result = yield predict.predict();
             if (result) {
                 return response.response(result);

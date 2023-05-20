@@ -33,13 +33,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = __importStar(require("fs"));
-const storage_1 = require("@google-cloud/storage");
+const __1 = require("..");
 class Upload {
     static upload(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { file } = request.payload;
+            const { file, folder } = request.payload;
             const filename = `${Date.now()}-${file.filename}`;
-            const blob = Upload.bucket.file("images/knowledge/" + filename);
+            const fullpath = folder + filename;
+            const blob = __1.bucket.file(fullpath);
             const fileStream = fs.readFileSync(file.path);
             const blobStream = blob.createWriteStream({
                 resumable: false
@@ -59,17 +60,11 @@ class Upload {
             while (!done) {
                 yield new Promise((resolve) => setTimeout(resolve, 100));
             }
-            return response.response(error ? { error: "Error uploading file" } : { image: blob.publicUrl() });
-        });
-    }
-    static get(request, response) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const { path } = request.params;
-            const file = fs.readFileSync(`./uploads/${path}`);
-            return response.response(file).type("image/png");
+            return response.response(error ? { error: "Error uploading file" } : {
+                path: fullpath,
+                url: `https://storage.googleapis.com/${__1.bucket.name}/${fullpath}`
+            });
         });
     }
 }
-Upload.storage = new storage_1.Storage({ keyFilename: "./google-cloud-key.json" });
-Upload.bucket = Upload.storage.bucket("agronify_bucket");
 exports.default = Upload;

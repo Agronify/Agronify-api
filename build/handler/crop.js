@@ -44,10 +44,11 @@ class Crop {
     }
     static post(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { name, description, image } = request.payload;
+            const { name, type, description, image } = request.payload;
             const res = yield __1.prisma.crop.create({
                 data: {
                     name,
+                    type,
                     description,
                     image
                 }
@@ -58,7 +59,7 @@ class Crop {
     static put(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
             const { id } = request.params;
-            const { name, description, image } = request.payload;
+            const { name, type, description, image } = request.payload;
             const res = yield __1.prisma.crop.update({
                 where: {
                     id: parseInt(id)
@@ -66,7 +67,8 @@ class Crop {
                 data: {
                     name,
                     description,
-                    image
+                    image,
+                    type
                 }
             });
             return res;

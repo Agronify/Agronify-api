@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -9,11 +32,28 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const tf = __importStar(require("@tensorflow/tfjs-node"));
+const __1 = require("..");
 class PredictService {
-    constructor(type, name, path) {
+    constructor(type, name, crop_id, path) {
         this.type = type;
         this.name = name;
         this.path = path;
+        this.crop_id = crop_id;
+        const fileModel = tf.io.fileSystem(`./models/${this.type}/${this.crop_id}/active/model.json`);
+        this.model = tf.loadLayersModel(fileModel);
+        this.mlModel = __1.prisma.mLModel.findFirst({
+            where: {
+                AND: [
+                    {
+                        crop_id: this.crop_id
+                    },
+                    {
+                        active: true
+                    }
+                ]
+            }
+        });
     }
     predict() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -29,23 +69,39 @@ class PredictService {
     }
     disease() {
         return __awaiter(this, void 0, void 0, function* () {
-            return new Promise((resolve, reject) => {
-                const time = Math.floor(Math.random() * 2000) + 1000;
-                const result = Math.floor(Math.random() * 100) + 1;
-                const confidence = Math.floor(Math.random() * 100) + 1;
-                setTimeout(() => {
-                    resolve({
-                        path: this.path,
-                        result: result > 50 ? "healthy" : "unhealthy",
-                        confidence: confidence,
-                        disease: result > 50 ? {} : {
-                            name: "Bacterial Blight",
-                            description: "lorem ipsum dolor sit amet consectetur adipi scing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-                            treatment: "lorem ipsum dolor sit amet consectetur adipi scing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
-                        },
-                    });
-                }, time);
-            });
+            const stream = yield __1.bucket.file(this.path).download();
+            const mlModel = yield this.mlModel;
+            try {
+                const tensor = tf.node.decodeImage(stream[0], 3).reshape([1, 150, 150, 3]);
+                const prediction = (yield this.model).predict(tensor);
+                const result = prediction.argMax(1).dataSync()[0];
+                const confidence = prediction.max(1).dataSync()[0] * 100;
+                const modelClass = yield __1.prisma.modelClass.findFirst({
+                    where: {
+                        AND: [
+                            {
+                                index: result
+                            },
+                            {
+                                mlmodel_id: mlModel === null || mlModel === void 0 ? void 0 : mlModel.id
+                            }
+                        ]
+                    },
+                    include: {
+                        disease: true,
+                    }
+                });
+                return {
+                    path: this.path,
+                    result: (modelClass === null || modelClass === void 0 ? void 0 : modelClass.disease.name) === "Healthy" ? "Healthy" : "unhealthy",
+                    disease: (modelClass === null || modelClass === void 0 ? void 0 : modelClass.disease.name) === "Healthy" ? undefined : modelClass === null || modelClass === void 0 ? void 0 : modelClass.disease,
+                    confidence: confidence
+                };
+            }
+            catch (error) {
+                console.log(error);
+            }
+            return true;
         });
     }
     ripeness() {
