@@ -18,6 +18,7 @@ class Predict {
     static post(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
             const { type, crop_id, path } = request.payload;
+            console.log(request.auth.credentials);
             const crop = yield __1.prisma.crop.findUnique({
                 where: {
                     id: parseInt(crop_id)

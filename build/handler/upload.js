@@ -58,7 +58,7 @@ class Upload {
             });
             blobStream.end(Buffer.from(fileStream));
             while (!done) {
-                yield new Promise((resolve) => setTimeout(resolve, 100));
+                yield new Promise((resolve) => setTimeout(resolve, 10));
             }
             return response.response(error ? { error: "Error uploading file" } : {
                 path: fullpath,

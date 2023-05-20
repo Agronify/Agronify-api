@@ -5,6 +5,7 @@ import { prisma } from "..";
 export default class Predict{
     public static async post(request: Request, response: ResponseToolkit) {
         const { type, crop_id, path } = request.payload as any;
+        console.log(request.auth.credentials)
         const crop = await prisma.crop.findUnique({
             where: {
                 id: parseInt(crop_id)

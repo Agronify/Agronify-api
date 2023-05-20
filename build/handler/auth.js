@@ -31,9 +31,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const __1 = require("..");
 const bcrypt = __importStar(require("bcryptjs"));
+const jwt = __importStar(require("jsonwebtoken"));
 class Auth {
     static signin(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -45,14 +57,35 @@ class Auth {
             });
             if (res) {
                 if (yield bcrypt.compare(password, res.password)) {
-                    return res;
+                    const { password } = res, user = __rest(res, ["password"]);
+                    console.log(user);
+                    const token = yield jwt.sign({
+                        id: user.id,
+                        email: user.email,
+                        phone: user.phone,
+                        name: user.name,
+                        is_admin: user.is_admin
+                    }, process.env.JWT_SECRET, {
+                        expiresIn: "1h",
+                        algorithm: "HS256"
+                    });
+                    return {
+                        success: true,
+                        token,
+                    };
                 }
                 else {
-                    return response.response({ error: "Password is wrong" }).code(400);
+                    return response.response({
+                        success: false,
+                        error: "Wrong password"
+                    }).code(400);
                 }
             }
             else {
-                return response.response({ error: "Email is not registered" }).code(400);
+                return response.response({
+                    success: false,
+                    error: "Email is not registered"
+                }).code(400);
             }
         });
     }

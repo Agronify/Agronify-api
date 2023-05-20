@@ -26,7 +26,7 @@ export default class Upload {
         });
         blobStream.end(Buffer.from(fileStream));
         while(!done) {
-            await new Promise((resolve) => setTimeout(resolve, 100));
+            await new Promise((resolve) => setTimeout(resolve, 10));
         }
         
         return response.response(error ? {error: "Error uploading file"} : {

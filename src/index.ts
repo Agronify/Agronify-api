@@ -13,12 +13,12 @@ import * as dotenv from 'dotenv'
 import Knowledge from "./handler/knowledge";
 import Auth from "./handler/auth";
 import User from "./handler/user";
-import { Encrypt } from "./prisma_middleware/password";
+import { GuardAdmin, GuardUser } from "./service/guard";
 
 export const prisma = new PrismaClient({
     log: ["query", "info", "warn", "error"]
 })
-prisma.$use(Encrypt)
+
 export const storage = new Storage({keyFilename: "./google-cloud-key.json"});
 export const bucket = storage.bucket("agronify_bucket");
 
@@ -27,7 +27,7 @@ init().then(async (server) => {
     await server.register(require('hapi-auth-jwt2'));
     server.auth.strategy('jwt', 'jwt', {
         key: process.env.JWT_SECRET,
-        validate: async (decoded:any, request:any, h:any) => {
+        validate: async (decoded:any, request:Request, h:any) => {
             const user = await prisma.user.findUnique({
                 where: {
                     id: decoded.id
@@ -40,12 +40,16 @@ init().then(async (server) => {
             }
         }
     });
+    server.auth.default('jwt');
 
 
     server.route({
         method: 'GET',
         path: '/v1/weather',
         handler: Weather.get,
+        options: {
+            auth: false
+        }
     });
 
     server.route({
@@ -59,150 +63,165 @@ init().then(async (server) => {
 				multipart: { output: "file" }
             }
         },
-        handler: Upload.upload
+        handler: new GuardUser(Upload.upload).handler
     });
 
     server.route({
         method: 'POST',
         path: '/v1/predict',
-        handler: Predict.post
+        handler: new GuardUser(Predict.post).handler,
     });
 
     server.route({
         method: 'GET',
         path: '/v1/knowledges/{id?}',
-        handler: Knowledge.get
+        handler: Knowledge.get,
+        options: {
+            auth: false
+        }
     });
     server.route({
         method: 'POST',
         path: '/v1/knowledges',
-        handler: Knowledge.post
+        handler: new GuardAdmin(Knowledge.post).handler,
     });
     server.route({
         method: 'PUT',
         path: '/v1/knowledges/{id}',
-        handler: Knowledge.put
+        handler: new GuardAdmin(Knowledge.put).handler,
     });
     server.route({
         method: 'DELETE',
         path: '/v1/knowledges/{id}',
-        handler: Knowledge.delete
+        handler: new GuardAdmin(Knowledge.delete).handler,
     });
 
     server.route({
         method: 'GET',
         path: '/v1/crops/{id?}',
-        handler: Crop.get
+        handler: Crop.get,
+        options: {
+            auth: false
+        }
     });
     server.route({
         method: 'POST',
         path: '/v1/crops',
-        handler: Crop.post
+        handler: new GuardAdmin(Crop.post).handler,
     });
     server.route({
         method: 'PUT',
         path: '/v1/crops/{id}',
-        handler: Crop.put
+        handler: new GuardAdmin(Crop.put).handler,
     });
     server.route({
         method: 'DELETE',
         path: '/v1/crops/{id}',
-        handler: Crop.delete
+        handler: new GuardAdmin(Crop.delete).handler,
     });
 
     server.route({
         method: 'GET',
         path: '/v1/crops/{crop_id}/diseases/{id?}',
-        handler: CropDisease.get
+        handler: CropDisease.get,
+        options: {
+            auth: false
+        }
     });
     server.route({
         method: 'POST',
         path: '/v1/crops/{crop_id}/diseases',
-        handler: CropDisease.post
+        handler: new GuardAdmin(CropDisease.post).handler,
     });
     server.route({
         method: 'PUT',
         path: '/v1/crops/{crop_id}/diseases/{id}',
-        handler: CropDisease.put
+        handler: new GuardAdmin(CropDisease.put).handler,
     });
     server.route({
         method: 'DELETE',
         path: '/v1/crops/{crop_id}/diseases/{id}',
-        handler: CropDisease.delete
+        handler: new GuardAdmin(CropDisease.delete).handler,
     });
 
     server.route({
         method: 'GET',
         path: '/v1/models/{id?}',
-        handler: MLModel.get
+        handler: new GuardAdmin(MLModel.get).handler,
     });
     server.route({
         method: 'POST',
         path: '/v1/models',
-        handler: MLModel.post
+        handler: new GuardAdmin(MLModel.post).handler,
     });
     server.route({
         method: 'PUT',
         path: '/v1/models/{id}',
-        handler: MLModel.put
+        handler: new GuardAdmin(MLModel.put).handler,
     });
     server.route({
         method: 'DELETE',
         path: '/v1/models/{id}',
-        handler: MLModel.delete
+        handler: new GuardAdmin(MLModel.delete).handler,
     });
 
     server.route({
         method: 'GET',
         path: '/v1/models/{mlmodel_id}/classes/{id?}',
-        handler: ModelClass.get
+        handler: new GuardAdmin(ModelClass.get).handler,
     });
     server.route({
         method: 'POST',
         path: '/v1/models/{mlmodel_id}/classes',
-        handler: ModelClass.post
+        handler: new GuardAdmin(ModelClass.post).handler,
     });
     server.route({
         method: 'PUT',
         path: '/v1/models/{mlmodel_id}/classes/{id}',
-        handler: ModelClass.put
+        handler: new GuardAdmin(ModelClass.put).handler,
     });
     server.route({
         method: 'DELETE',
         path: '/v1/models/{mlmodel_id}/classes/{id}',
-        handler: ModelClass.delete
+        handler: new GuardAdmin(ModelClass.delete).handler,
     });
 
     server.route({
         method: 'POST',
         path: '/v1/auth/signin',
-        handler: Auth.signin
+        handler: Auth.signin,
+        options: {
+            auth: false
+        }
     });
     server.route({
         method: 'POST',
         path: '/v1/auth/signup',
-        handler: Auth.signup
+        handler: Auth.signup,
+        options: {
+            auth: false
+        }
     });
 
     server.route({
         method: 'GET',
         path: '/v1/users/{id?}',
-        handler: User.get
+        handler: new GuardAdmin(User.get).handler,
     });
     server.route({
         method: 'POST',
         path: '/v1/users',
-        handler: User.post
+        handler: new GuardAdmin(User.post).handler,
     });
     server.route({
         method: 'PUT',
         path: '/v1/users/{id}',
-        handler: User.put
+        handler: new GuardAdmin(User.put).handler,
     });
     server.route({
         method: 'DELETE',
         path: '/v1/users/{id}',
-        handler: User.delete
+        handler: new GuardAdmin(User.delete).handler,
     });
 
     start();
