@@ -42,50 +42,50 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const __1 = require("..");
 const bcrypt = __importStar(require("bcryptjs"));
 const jwt = __importStar(require("jsonwebtoken"));
+const auth_1 = __importDefault(require("../utils/auth"));
 class Auth {
     static signin(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
             const { email, phone, password } = request.payload;
             const res = yield __1.prisma.user.findUnique({
                 where: {
-                    email
-                }
+                    email,
+                },
             });
             if (res) {
                 if (yield bcrypt.compare(password, res.password)) {
                     const { password } = res, user = __rest(res, ["password"]);
                     console.log(user);
-                    const token = yield jwt.sign({
-                        id: user.id,
-                        email: user.email,
-                        phone: user.phone,
-                        name: user.name,
-                        is_admin: user.is_admin
-                    }, process.env.JWT_SECRET, {
-                        expiresIn: "1h",
-                        algorithm: "HS256"
-                    });
+                    const token = yield auth_1.default.generateToken(res);
+                    response.state("token", token);
                     return {
                         success: true,
                         token,
                     };
                 }
                 else {
-                    return response.response({
+                    return response
+                        .response({
                         success: false,
-                        error: "Wrong password"
-                    }).code(400);
+                        error: "Wrong password",
+                    })
+                        .code(400);
                 }
             }
             else {
-                return response.response({
+                return response
+                    .response({
                     success: false,
-                    error: "Email is not registered"
-                }).code(400);
+                    error: "Email is not registered",
+                })
+                    .code(400);
             }
         });
     }
@@ -99,15 +99,52 @@ class Auth {
                         name,
                         email,
                         phone,
-                        password: yield bcrypt.hash(password, 10)
-                    }
+                        password: yield bcrypt.hash(password, 10),
+                    },
                 });
             }
             catch (error) {
-                return response.response({ error: "Email is already registered" }).code(400);
+                return response
+                    .response({ error: "Email is already registered" })
+                    .code(400);
             }
             res.password = null;
             return res;
+        });
+    }
+    static logout(request, response) {
+        return __awaiter(this, void 0, void 0, function* () {
+            response.unstate("token");
+            return {
+                success: true,
+            };
+        });
+    }
+    static check(request, response) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const token = request.state.token;
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+            const user = yield __1.prisma.user.findUnique({
+                where: {
+                    id: decoded.id,
+                },
+            });
+            if (user) {
+                const newToken = yield auth_1.default.generateToken(user);
+                response.state("token", newToken);
+                return {
+                    success: true,
+                    token: newToken,
+                };
+            }
+            else {
+                return response
+                    .response({
+                    success: false,
+                    error: "User not found",
+                })
+                    .code(400);
+            }
         });
     }
 }

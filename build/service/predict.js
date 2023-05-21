@@ -49,13 +49,13 @@ class PredictService {
             where: {
                 AND: [
                     {
-                        crop_id: this.crop_id
+                        crop_id: this.crop_id,
                     },
                     {
-                        active: true
-                    }
-                ]
-            }
+                        active: true,
+                    },
+                ],
+            },
         });
     }
     init() {
@@ -86,7 +86,9 @@ class PredictService {
             const stream = yield __1.bucket.file(this.path).download();
             const mlModel = yield this.mlModel;
             try {
-                const tensor = tf.node.decodeImage(stream[0], 3).reshape([1, 150, 150, 3]);
+                const tensor = tf.node
+                    .decodeImage(stream[0], 3)
+                    .reshape([1, 150, 150, 3]);
                 const prediction = (yield this.model).predict(tensor);
                 const result = prediction.argMax(1).dataSync()[0];
                 const confidence = prediction.max(1).dataSync()[0] * 100;
@@ -94,22 +96,24 @@ class PredictService {
                     where: {
                         AND: [
                             {
-                                index: result
+                                index: result,
                             },
                             {
-                                mlmodel_id: mlModel === null || mlModel === void 0 ? void 0 : mlModel.id
-                            }
-                        ]
+                                mlmodel_id: mlModel === null || mlModel === void 0 ? void 0 : mlModel.id,
+                            },
+                        ],
                     },
                     include: {
                         disease: true,
-                    }
+                    },
                 });
                 return {
                     path: this.path,
                     result: (modelClass === null || modelClass === void 0 ? void 0 : modelClass.disease.name) === "Healthy" ? "Healthy" : "unhealthy",
-                    disease: (modelClass === null || modelClass === void 0 ? void 0 : modelClass.disease.name) === "Healthy" ? undefined : modelClass === null || modelClass === void 0 ? void 0 : modelClass.disease,
-                    confidence: confidence
+                    disease: (modelClass === null || modelClass === void 0 ? void 0 : modelClass.disease.name) === "Healthy"
+                        ? undefined
+                        : modelClass === null || modelClass === void 0 ? void 0 : modelClass.disease,
+                    confidence: confidence,
                 };
             }
             catch (error) {
@@ -128,7 +132,7 @@ class PredictService {
                     resolve({
                         path: this.path,
                         result: result < 20 ? "unripe" : result > 80 ? "too ripe" : "ripe",
-                        confidence: confidence
+                        confidence: confidence,
                     });
                 }, time);
             });

@@ -38,7 +38,7 @@ class Upload {
     static upload(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
             const { file, type } = request.payload;
-            if (["predicts", "models", "images"].includes(type)) {
+            if (!["predicts", "models", "images"].includes(type)) {
                 return response.response({ error: "invalid type" });
             }
             const filename = `${Date.now()}-${file.filename}`;
@@ -46,7 +46,7 @@ class Upload {
             const blob = __1.bucket.file(fullpath);
             const fileStream = fs.readFileSync(file.path);
             const blobStream = blob.createWriteStream({
-                resumable: false
+                resumable: false,
             });
             let done = false;
             let error = false;
@@ -65,10 +65,12 @@ class Upload {
             while (!done) {
                 yield new Promise((resolve) => setTimeout(resolve, 10));
             }
-            return response.response(error ? { error: "Error uploading file" } : {
-                path: fullpath,
-                url: `https://storage.googleapis.com/${__1.bucket.name}/${fullpath}`
-            });
+            return response.response(error
+                ? { error: "Error uploading file" }
+                : {
+                    path: fullpath,
+                    url: `https://storage.googleapis.com/${__1.bucket.name}/${fullpath}`,
+                });
         });
     }
 }
