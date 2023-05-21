@@ -17,7 +17,13 @@ const hapi_1 = __importDefault(require("@hapi/hapi"));
 const init = () => __awaiter(void 0, void 0, void 0, function* () {
     exports.server = hapi_1.default.server({
         port: process.env.PORT || 4000,
-        host: '0.0.0.0'
+        host: "0.0.0.0",
+        routes: {
+            cors: {
+                origin: ["*"],
+                credentials: true,
+            },
+        },
     });
     return exports.server;
 });
@@ -29,7 +35,7 @@ const start = function () {
     });
 };
 exports.start = start;
-process.on('unhandledRejection', (err) => {
+process.on("unhandledRejection", (err) => {
     console.error("unhandledRejection");
     console.error(err);
 });
