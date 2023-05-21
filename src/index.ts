@@ -254,6 +254,9 @@ init().then(async (server) => {
       );
       return response;
     },
+    options: {
+      auth: false,
+    },
   });
 
   start();

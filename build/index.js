@@ -271,6 +271,9 @@ dotenv.config();
             response.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
             return response;
         },
+        options: {
+            auth: false,
+        },
     });
     (0, server_1.start)();
 }));
