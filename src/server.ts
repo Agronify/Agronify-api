@@ -7,7 +7,7 @@ export const init = async (): Promise<Server> => {
     host: "0.0.0.0",
     routes: {
       cors: {
-        origin: ["*"],
+        origin: ["localhost:3000", "http://dev.agronify.com"],
         credentials: true,
       },
     },
