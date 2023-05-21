@@ -243,7 +243,10 @@ init().then(async (server) => {
     path: "/{any*}",
     handler: function (request, h) {
       const response = h.response();
-      response.header("Access-Control-Allow-Origin", "*");
+      response.header(
+        "Access-Control-Allow-Origin",
+        "localhost:3000,dev.agronify.com"
+      );
       response.header(
         "Access-Control-Allow-Methods",
         "POST, GET, PUT, DELETE, OPTIONS"
