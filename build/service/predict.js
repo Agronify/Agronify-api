@@ -33,15 +33,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const tf = __importStar(require("@tensorflow/tfjs-node"));
+const fs = __importStar(require("fs"));
 const __1 = require("..");
+const model_1 = require("../utils/model");
 class PredictService {
     constructor(type, name, crop_id, path) {
         this.type = type;
         this.name = name;
         this.path = path;
         this.crop_id = crop_id;
-        const fileModel = tf.io.fileSystem(`./models/${this.type}/${this.crop_id}/active/model.json`);
-        this.model = tf.loadLayersModel(fileModel);
+        this.model = new Promise((resolve, reject) => {
+            resolve(tf.sequential());
+        });
         this.mlModel = __1.prisma.mLModel.findFirst({
             where: {
                 AND: [
@@ -53,6 +56,17 @@ class PredictService {
                     }
                 ]
             }
+        });
+    }
+    init() {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            let dir = `./models/${this.type}/${this.crop_id}/active/model.json`;
+            if (!fs.existsSync(dir)) {
+                yield model_1.ModelUtils.downloadModel((_a = (yield this.mlModel)) === null || _a === void 0 ? void 0 : _a.file, this.type, this.crop_id);
+            }
+            const fileModel = tf.io.fileSystem(dir);
+            this.model = tf.loadLayersModel(fileModel);
         });
     }
     predict() {

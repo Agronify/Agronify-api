@@ -2,6 +2,7 @@ import * as tf from '@tensorflow/tfjs-node';
 import * as fs from 'fs';
 import { bucket, prisma } from '..';
 import { MLModel } from '@prisma/client';
+import { ModelUtils } from '../utils/model';
 export default class PredictService{
     private path : string;
     private type : string;
@@ -14,8 +15,9 @@ export default class PredictService{
         this.name = name;
         this.path = path;
         this.crop_id = crop_id;
-        const fileModel = tf.io.fileSystem(`./models/${this.type}/${this.crop_id}/active/model.json`);
-        this.model = tf.loadLayersModel(fileModel);
+        this.model = new Promise((resolve, reject) => {
+            resolve(tf.sequential());
+        });
         this.mlModel = prisma.mLModel.findFirst({
             where: {
                 AND: [
@@ -28,6 +30,15 @@ export default class PredictService{
                 ]
             }
         });
+    }
+
+    public async init(){
+        let dir = `./models/${this.type}/${this.crop_id}/active/model.json`;
+        if (!fs.existsSync(dir)) {
+            await ModelUtils.downloadModel((await this.mlModel)?.file!, this.type, this.crop_id);
+        }
+        const fileModel = tf.io.fileSystem(dir);
+        this.model = tf.loadLayersModel(fileModel);
     }
 
     public async predict(){

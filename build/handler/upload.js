@@ -37,9 +37,12 @@ const __1 = require("..");
 class Upload {
     static upload(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { file, folder } = request.payload;
+            const { file, type } = request.payload;
+            if (["predicts", "models", "images"].includes(type)) {
+                return response.response({ error: "invalid type" });
+            }
             const filename = `${Date.now()}-${file.filename}`;
-            const fullpath = folder + filename;
+            const fullpath = type + "/" + filename;
             const blob = __1.bucket.file(fullpath);
             const fileStream = fs.readFileSync(file.path);
             const blobStream = blob.createWriteStream({
@@ -49,7 +52,9 @@ class Upload {
             let error = false;
             blobStream.on("finish", () => {
                 done = true;
-                blob.makePublic();
+                if (type !== "models") {
+                    blob.makePublic();
+                }
             });
             blobStream.on("error", (err) => {
                 done = true;

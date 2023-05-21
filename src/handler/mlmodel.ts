@@ -3,6 +3,7 @@ import { bucket, prisma } from "..";
 import extract from "extract-zip";
 import * as fs from "fs";
 import { resolve } from "path";
+import { ModelUtils } from "../utils/model";
 export default class MLModel {
     public static async get(request: Request, response: ResponseToolkit) {
         const { id } = request.params as any;
@@ -51,7 +52,7 @@ export default class MLModel {
                     active: false
                 }
             });
-            MLModel.downloadModel(file, type, crop_id);
+            await ModelUtils.downloadModel(file, type, crop_id);
         }
         return res;
     }
@@ -85,7 +86,7 @@ export default class MLModel {
                     active: false
                 }
             });
-            MLModel.downloadModel(file, type, crop_id);
+            await ModelUtils.downloadModel(file, type, crop_id);
         }
         return res;
     }
@@ -115,11 +116,5 @@ export default class MLModel {
         return res;
     }
 
-    private static async downloadModel(file: string, type: string, crop_id: number) {
-        const tmp_name = `${Date.now()}-model.zip`;
-        bucket.file(file).download({destination: tmp_name}, async function(err) {
-            await extract("./"+tmp_name, {dir: resolve(`./models/${type}/${crop_id}/active/`)});
-            fs.unlinkSync(tmp_name);
-        });
-    }
+    
 }

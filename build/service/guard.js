@@ -9,12 +9,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GuardAdmin = exports.GuardUser = void 0;
-class GuardUser {
-    constructor(h) {
+exports.GuardService = void 0;
+class GuardService {
+    constructor(h, role) {
         this.h = h;
+        this.role = role;
+        this.h = this.h.bind(this);
+        this.handler = this.handler.bind(this);
+        this.User = this.User.bind(this);
+        this.Admin = this.Admin.bind(this);
     }
     handler(request, response) {
+        return __awaiter(this, void 0, void 0, function* () {
+            switch (this.role) {
+                case "User":
+                    return this.User(request, response);
+                case "Admin":
+                    return this.Admin(request, response);
+                default:
+                    return response.response({ error: "Not implemented" }).code(501);
+            }
+        });
+    }
+    User(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!request.auth.isAuthenticated) {
                 return response.response({ error: "Unauthorized" }).code(401);
@@ -22,24 +39,7 @@ class GuardUser {
             return this.h(request, response);
         });
     }
-    static guardAdmin(request, response, handler) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (!request.auth.isAuthenticated) {
-                return response.response({ error: "Unauthorized" }).code(401);
-            }
-            if (!request.auth.credentials.is_admin) {
-                return response.response({ error: "Forbidden" }).code(403);
-            }
-            return handler(request, response);
-        });
-    }
-}
-exports.GuardUser = GuardUser;
-class GuardAdmin {
-    constructor(h) {
-        this.h = h;
-    }
-    handler(request, response) {
+    Admin(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!request.auth.isAuthenticated) {
                 return response.response({ error: "Unauthorized" }).code(401);
@@ -51,4 +51,4 @@ class GuardAdmin {
         });
     }
 }
-exports.GuardAdmin = GuardAdmin;
+exports.GuardService = GuardService;

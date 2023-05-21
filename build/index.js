@@ -95,12 +95,12 @@ dotenv.config();
                 multipart: { output: "file" }
             }
         },
-        handler: new guard_1.GuardUser(upload_1.default.upload).handler
+        handler: new guard_1.GuardService(upload_1.default.upload, "User").handler
     });
     server.route({
         method: 'POST',
         path: '/v1/predict',
-        handler: new guard_1.GuardUser(predict_1.default.post).handler,
+        handler: new guard_1.GuardService(predict_1.default.post, "User").handler
     });
     server.route({
         method: 'GET',
@@ -113,17 +113,17 @@ dotenv.config();
     server.route({
         method: 'POST',
         path: '/v1/knowledges',
-        handler: new guard_1.GuardAdmin(knowledge_1.default.post).handler,
+        handler: new guard_1.GuardService(knowledge_1.default.post, "Admin").handler
     });
     server.route({
         method: 'PUT',
         path: '/v1/knowledges/{id}',
-        handler: new guard_1.GuardAdmin(knowledge_1.default.put).handler,
+        handler: new guard_1.GuardService(knowledge_1.default.put, "Admin").handler
     });
     server.route({
         method: 'DELETE',
         path: '/v1/knowledges/{id}',
-        handler: new guard_1.GuardAdmin(knowledge_1.default.delete).handler,
+        handler: new guard_1.GuardService(knowledge_1.default.delete, "Admin").handler
     });
     server.route({
         method: 'GET',
@@ -136,17 +136,17 @@ dotenv.config();
     server.route({
         method: 'POST',
         path: '/v1/crops',
-        handler: new guard_1.GuardAdmin(crop_1.default.post).handler,
+        handler: new guard_1.GuardService(crop_1.default.post, "Admin").handler
     });
     server.route({
         method: 'PUT',
         path: '/v1/crops/{id}',
-        handler: new guard_1.GuardAdmin(crop_1.default.put).handler,
+        handler: new guard_1.GuardService(crop_1.default.put, "Admin").handler
     });
     server.route({
         method: 'DELETE',
         path: '/v1/crops/{id}',
-        handler: new guard_1.GuardAdmin(crop_1.default.delete).handler,
+        handler: new guard_1.GuardService(crop_1.default.delete, "Admin").handler
     });
     server.route({
         method: 'GET',
@@ -159,57 +159,57 @@ dotenv.config();
     server.route({
         method: 'POST',
         path: '/v1/crops/{crop_id}/diseases',
-        handler: new guard_1.GuardAdmin(cropdisease_1.default.post).handler,
+        handler: new guard_1.GuardService(cropdisease_1.default.post, "Admin").handler
     });
     server.route({
         method: 'PUT',
         path: '/v1/crops/{crop_id}/diseases/{id}',
-        handler: new guard_1.GuardAdmin(cropdisease_1.default.put).handler,
+        handler: new guard_1.GuardService(cropdisease_1.default.put, "Admin").handler
     });
     server.route({
         method: 'DELETE',
         path: '/v1/crops/{crop_id}/diseases/{id}',
-        handler: new guard_1.GuardAdmin(cropdisease_1.default.delete).handler,
+        handler: new guard_1.GuardService(cropdisease_1.default.delete, "Admin").handler
     });
     server.route({
         method: 'GET',
         path: '/v1/models/{id?}',
-        handler: new guard_1.GuardAdmin(mlmodel_1.default.get).handler,
+        handler: new guard_1.GuardService(mlmodel_1.default.get, "Admin").handler,
     });
     server.route({
         method: 'POST',
         path: '/v1/models',
-        handler: new guard_1.GuardAdmin(mlmodel_1.default.post).handler,
+        handler: new guard_1.GuardService(mlmodel_1.default.post, "Admin").handler,
     });
     server.route({
         method: 'PUT',
         path: '/v1/models/{id}',
-        handler: new guard_1.GuardAdmin(mlmodel_1.default.put).handler,
+        handler: new guard_1.GuardService(mlmodel_1.default.put, "Admin").handler,
     });
     server.route({
         method: 'DELETE',
         path: '/v1/models/{id}',
-        handler: new guard_1.GuardAdmin(mlmodel_1.default.delete).handler,
+        handler: new guard_1.GuardService(mlmodel_1.default.delete, "Admin").handler,
     });
     server.route({
         method: 'GET',
         path: '/v1/models/{mlmodel_id}/classes/{id?}',
-        handler: new guard_1.GuardAdmin(modelclass_1.ModelClass.get).handler,
+        handler: new guard_1.GuardService(modelclass_1.ModelClass.get, "Admin").handler,
     });
     server.route({
         method: 'POST',
         path: '/v1/models/{mlmodel_id}/classes',
-        handler: new guard_1.GuardAdmin(modelclass_1.ModelClass.post).handler,
+        handler: new guard_1.GuardService(modelclass_1.ModelClass.post, "Admin").handler,
     });
     server.route({
         method: 'PUT',
         path: '/v1/models/{mlmodel_id}/classes/{id}',
-        handler: new guard_1.GuardAdmin(modelclass_1.ModelClass.put).handler,
+        handler: new guard_1.GuardService(modelclass_1.ModelClass.put, "Admin").handler,
     });
     server.route({
         method: 'DELETE',
         path: '/v1/models/{mlmodel_id}/classes/{id}',
-        handler: new guard_1.GuardAdmin(modelclass_1.ModelClass.delete).handler,
+        handler: new guard_1.GuardService(modelclass_1.ModelClass.delete, "Admin").handler,
     });
     server.route({
         method: 'POST',
@@ -230,22 +230,22 @@ dotenv.config();
     server.route({
         method: 'GET',
         path: '/v1/users/{id?}',
-        handler: new guard_1.GuardAdmin(user_1.default.get).handler,
+        handler: new guard_1.GuardService(user_1.default.get, "Admin").handler,
     });
     server.route({
         method: 'POST',
         path: '/v1/users',
-        handler: new guard_1.GuardAdmin(user_1.default.post).handler,
+        handler: new guard_1.GuardService(user_1.default.post, "Admin").handler,
     });
     server.route({
         method: 'PUT',
         path: '/v1/users/{id}',
-        handler: new guard_1.GuardAdmin(user_1.default.put).handler,
+        handler: new guard_1.GuardService(user_1.default.put, "Admin").handler,
     });
     server.route({
         method: 'DELETE',
         path: '/v1/users/{id}',
-        handler: new guard_1.GuardAdmin(user_1.default.delete).handler,
+        handler: new guard_1.GuardService(user_1.default.delete, "Admin").handler,
     });
     (0, server_1.start)();
 }));

@@ -5,9 +5,12 @@ import { bucket } from "..";
 
 export default class Upload {
     public static async upload(request: Request, response: ResponseToolkit) {
-        const { file, folder } = request.payload as any;
+        const { file, type } = request.payload as any;
+        if (["predicts","models","images"].includes(type)) {
+            return response.response({error: "invalid type"});
+        }
         const filename = `${Date.now()}-${file.filename}`;
-        const fullpath = folder+filename;
+        const fullpath = type+"/"+filename;
         const blob = bucket.file(fullpath);
         const fileStream = fs.readFileSync(file.path);
         const blobStream = blob.createWriteStream({
@@ -17,7 +20,9 @@ export default class Upload {
         let error = false;
         blobStream.on("finish", () => {
             done = true;
-            blob.makePublic();
+            if(type!=="models"){
+                blob.makePublic();
+            }
         });
         blobStream.on("error", (err) => {
             done = true;

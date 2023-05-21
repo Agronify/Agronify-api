@@ -18,7 +18,6 @@ class Predict {
     static post(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
             const { type, crop_id, path } = request.payload;
-            console.log(request.auth.credentials);
             const crop = yield __1.prisma.crop.findUnique({
                 where: {
                     id: parseInt(crop_id)
@@ -28,6 +27,7 @@ class Predict {
                 return response.response({ error: "invalid crop_id" });
             }
             const predict = new predict_1.default(type, crop === null || crop === void 0 ? void 0 : crop.name, crop === null || crop === void 0 ? void 0 : crop.id, path);
+            yield predict.init();
             const result = yield predict.predict();
             if (result) {
                 return response.response(result);

@@ -13,7 +13,8 @@ import * as dotenv from 'dotenv'
 import Knowledge from "./handler/knowledge";
 import Auth from "./handler/auth";
 import User from "./handler/user";
-import { GuardAdmin, GuardUser } from "./service/guard";
+import {GuardService} from "./service/guard";
+
 
 export const prisma = new PrismaClient({
     log: ["query", "info", "warn", "error"]
@@ -63,13 +64,13 @@ init().then(async (server) => {
 				multipart: { output: "file" }
             }
         },
-        handler: new GuardUser(Upload.upload).handler
+        handler: new GuardService(Upload.upload,"User").handler
     });
 
     server.route({
         method: 'POST',
         path: '/v1/predict',
-        handler: new GuardUser(Predict.post).handler,
+        handler: new GuardService(Predict.post,"User").handler
     });
 
     server.route({
@@ -83,17 +84,17 @@ init().then(async (server) => {
     server.route({
         method: 'POST',
         path: '/v1/knowledges',
-        handler: new GuardAdmin(Knowledge.post).handler,
+        handler: new GuardService(Knowledge.post,"Admin").handler
     });
     server.route({
         method: 'PUT',
         path: '/v1/knowledges/{id}',
-        handler: new GuardAdmin(Knowledge.put).handler,
+        handler: new GuardService(Knowledge.put,"Admin").handler
     });
     server.route({
         method: 'DELETE',
         path: '/v1/knowledges/{id}',
-        handler: new GuardAdmin(Knowledge.delete).handler,
+        handler: new GuardService(Knowledge.delete,"Admin").handler
     });
 
     server.route({
@@ -107,17 +108,17 @@ init().then(async (server) => {
     server.route({
         method: 'POST',
         path: '/v1/crops',
-        handler: new GuardAdmin(Crop.post).handler,
+        handler: new GuardService(Crop.post,"Admin").handler
     });
     server.route({
         method: 'PUT',
         path: '/v1/crops/{id}',
-        handler: new GuardAdmin(Crop.put).handler,
+        handler: new GuardService(Crop.put,"Admin").handler
     });
     server.route({
         method: 'DELETE',
         path: '/v1/crops/{id}',
-        handler: new GuardAdmin(Crop.delete).handler,
+        handler: new GuardService(Crop.delete,"Admin").handler
     });
 
     server.route({
@@ -131,59 +132,59 @@ init().then(async (server) => {
     server.route({
         method: 'POST',
         path: '/v1/crops/{crop_id}/diseases',
-        handler: new GuardAdmin(CropDisease.post).handler,
+        handler: new GuardService(CropDisease.post,"Admin").handler
     });
     server.route({
         method: 'PUT',
         path: '/v1/crops/{crop_id}/diseases/{id}',
-        handler: new GuardAdmin(CropDisease.put).handler,
+        handler: new GuardService(CropDisease.put,"Admin").handler
     });
     server.route({
         method: 'DELETE',
         path: '/v1/crops/{crop_id}/diseases/{id}',
-        handler: new GuardAdmin(CropDisease.delete).handler,
+        handler: new GuardService(CropDisease.delete,"Admin").handler
     });
 
     server.route({
         method: 'GET',
         path: '/v1/models/{id?}',
-        handler: new GuardAdmin(MLModel.get).handler,
+        handler: new GuardService(MLModel.get,"Admin").handler,
     });
     server.route({
         method: 'POST',
         path: '/v1/models',
-        handler: new GuardAdmin(MLModel.post).handler,
+        handler: new GuardService(MLModel.post,"Admin").handler,
     });
     server.route({
         method: 'PUT',
         path: '/v1/models/{id}',
-        handler: new GuardAdmin(MLModel.put).handler,
+        handler: new GuardService(MLModel.put,"Admin").handler,
     });
     server.route({
         method: 'DELETE',
         path: '/v1/models/{id}',
-        handler: new GuardAdmin(MLModel.delete).handler,
+        handler: new GuardService(MLModel.delete,"Admin").handler,
     });
 
     server.route({
         method: 'GET',
         path: '/v1/models/{mlmodel_id}/classes/{id?}',
-        handler: new GuardAdmin(ModelClass.get).handler,
+        handler: new GuardService(ModelClass.get,"Admin").handler,
     });
     server.route({
         method: 'POST',
         path: '/v1/models/{mlmodel_id}/classes',
-        handler: new GuardAdmin(ModelClass.post).handler,
+        handler: new GuardService(ModelClass.post,"Admin").handler,
     });
     server.route({
         method: 'PUT',
         path: '/v1/models/{mlmodel_id}/classes/{id}',
-        handler: new GuardAdmin(ModelClass.put).handler,
+        handler: new GuardService(ModelClass.put,"Admin").handler,
     });
     server.route({
         method: 'DELETE',
         path: '/v1/models/{mlmodel_id}/classes/{id}',
-        handler: new GuardAdmin(ModelClass.delete).handler,
+        handler: new GuardService(ModelClass.delete,"Admin").handler,
     });
 
     server.route({
@@ -206,22 +207,22 @@ init().then(async (server) => {
     server.route({
         method: 'GET',
         path: '/v1/users/{id?}',
-        handler: new GuardAdmin(User.get).handler,
+        handler: new GuardService(User.get,"Admin").handler,
     });
     server.route({
         method: 'POST',
         path: '/v1/users',
-        handler: new GuardAdmin(User.post).handler,
+        handler: new GuardService(User.post,"Admin").handler,
     });
     server.route({
         method: 'PUT',
         path: '/v1/users/{id}',
-        handler: new GuardAdmin(User.put).handler,
+        handler: new GuardService(User.put,"Admin").handler,
     });
     server.route({
         method: 'DELETE',
         path: '/v1/users/{id}',
-        handler: new GuardAdmin(User.delete).handler,
+        handler: new GuardService(User.delete,"Admin").handler,
     });
 
     start();
