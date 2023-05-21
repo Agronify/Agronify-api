@@ -27,7 +27,7 @@ class WeatherService {
     }
     getForecast() {
         return __awaiter(this, void 0, void 0, function* () {
-            let res = yield axios_1.default.get(`https://api.open-meteo.com/v1/forecast?latitude=${this.lat}&longitude=${this.lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,precipitation_probability_max&timezone=${this.tz}`);
+            let res = yield axios_1.default.get(`https://api.open-meteo.com/v1/forecast?latitude=${this.lat}&longitude=${this.lon}&daily=weathercode,windspeed_10m_max,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=${this.tz}&forecast_days=3`);
             return res.data;
         });
     }
