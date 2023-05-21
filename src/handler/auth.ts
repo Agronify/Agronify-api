@@ -19,6 +19,7 @@ export default class Auth {
         const token = await AuthUtils.generateToken(res);
         response.state("token", token);
         return {
+          ...user,
           success: true,
           token,
         };

@@ -65,10 +65,7 @@ class Auth {
                     console.log(user);
                     const token = yield auth_1.default.generateToken(res);
                     response.state("token", token);
-                    return {
-                        success: true,
-                        token,
-                    };
+                    return Object.assign(Object.assign({}, user), { success: true, token });
                 }
                 else {
                     return response
