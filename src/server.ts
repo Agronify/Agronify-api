@@ -5,6 +5,12 @@ export const init = async (): Promise<Server> => {
   server = Hapi.server({
     port: process.env.PORT || 4000,
     host: "0.0.0.0",
+    routes: {
+      cors: {
+        origin: ["localhost:3000", "http://dev.agronify.com"],
+        credentials: true,
+      },
+    },
   });
   return server;
 };
