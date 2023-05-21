@@ -261,5 +261,16 @@ dotenv.config();
         path: "/v1/users/{id}",
         handler: new guard_1.GuardService(user_1.default.delete, "Admin").handler,
     });
+    server.route({
+        method: "OPTIONS",
+        path: "/{any*}",
+        handler: function (request, h) {
+            const response = h.response();
+            response.header("Access-Control-Allow-Origin", "*");
+            response.header("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
+            response.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+            return response;
+        },
+    });
     (0, server_1.start)();
 }));
