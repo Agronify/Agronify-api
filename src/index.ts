@@ -245,7 +245,7 @@ init().then(async (server) => {
       const response = h.response();
       response.header(
         "Access-Control-Allow-Origin",
-        "localhost:3000,dev.agronify.com"
+        request.headers.origin || "*"
       );
       response.header(
         "Access-Control-Allow-Methods",
