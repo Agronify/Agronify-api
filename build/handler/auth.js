@@ -99,13 +99,14 @@ class Auth {
                         name,
                         email,
                         phone,
-                        password
+                        password: yield bcrypt.hash(password, 10)
                     }
                 });
             }
             catch (error) {
                 return response.response({ error: "Email is already registered" }).code(400);
             }
+            res.password = null;
             return res;
         });
     }
