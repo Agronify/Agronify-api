@@ -21,20 +21,20 @@ class ModelClass {
                     where: {
                         AND: [
                             {
-                                id: parseInt(id)
+                                id: parseInt(id),
                             },
                             {
-                                mlmodel_id: parseInt(mlmodel_id)
-                            }
-                        ]
-                    }
+                                mlmodel_id: parseInt(mlmodel_id),
+                            },
+                        ],
+                    },
                 });
                 return res;
             }
             res = __1.prisma.modelClass.findMany({
                 where: {
-                    mlmodel_id: parseInt(mlmodel_id)
-                }
+                    mlmodel_id: parseInt(mlmodel_id),
+                },
             });
             return res;
         });
@@ -45,12 +45,12 @@ class ModelClass {
             const { mlmodel_id } = request.params;
             const model = yield __1.prisma.mLModel.findUnique({
                 where: {
-                    id: parseInt(mlmodel_id)
-                }
+                    id: parseInt(mlmodel_id),
+                },
             });
             if (model && parseInt(index) >= (model === null || model === void 0 ? void 0 : model.classAmount)) {
                 return {
-                    error: "Index out of range"
+                    error: "Index out of range",
                 };
             }
             const res = yield __1.prisma.modelClass.create({
@@ -58,15 +58,15 @@ class ModelClass {
                     index,
                     mlmodel: {
                         connect: {
-                            id: parseInt(mlmodel_id)
-                        }
+                            id: parseInt(mlmodel_id),
+                        },
                     },
                     disease: {
                         connect: {
-                            id: parseInt(disease_id)
-                        }
-                    }
-                }
+                            id: parseInt(disease_id),
+                        },
+                    },
+                },
             });
             return res;
         });
@@ -77,26 +77,26 @@ class ModelClass {
             const { mlmodel_id, id } = request.params;
             const model = yield __1.prisma.mLModel.findUnique({
                 where: {
-                    id: parseInt(mlmodel_id)
-                }
+                    id: parseInt(mlmodel_id),
+                },
             });
             if (model && parseInt(index) >= (model === null || model === void 0 ? void 0 : model.classAmount)) {
                 return {
-                    error: "Index out of range"
+                    error: "Index out of range",
                 };
             }
             const res = yield __1.prisma.modelClass.update({
                 where: {
-                    id: parseInt(id)
+                    id: parseInt(id),
                 },
                 data: {
                     index,
                     disease: {
                         connect: {
-                            id: parseInt(disease_id)
-                        }
-                    }
-                }
+                            id: parseInt(disease_id),
+                        },
+                    },
+                },
             });
             return res;
         });
@@ -106,8 +106,8 @@ class ModelClass {
             const { id } = request.params;
             const res = yield __1.prisma.modelClass.delete({
                 where: {
-                    id: parseInt(id)
-                }
+                    id: parseInt(id),
+                },
             });
             return res;
         });

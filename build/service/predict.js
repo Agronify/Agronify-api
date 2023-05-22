@@ -31,11 +31,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const tf = __importStar(require("@tensorflow/tfjs-node"));
 const fs = __importStar(require("fs"));
 const __1 = require("..");
 const model_1 = require("../utils/model");
+const sharp_1 = __importDefault(require("sharp"));
 class PredictService {
     constructor(type, name, crop_id, path) {
         this.type = type;
@@ -59,11 +63,11 @@ class PredictService {
         });
     }
     init() {
-        var _a;
+        var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
-            let dir = `./models/${this.type}/${this.crop_id}/active/model.json`;
+            let dir = `./models/${this.type}/${this.crop_id}/${(_a = (yield this.mlModel)) === null || _a === void 0 ? void 0 : _a.id}/model.json`;
             if (!fs.existsSync(dir)) {
-                yield model_1.ModelUtils.downloadModel((_a = (yield this.mlModel)) === null || _a === void 0 ? void 0 : _a.file, this.type, this.crop_id);
+                yield model_1.ModelUtils.downloadModel((_b = (yield this.mlModel)) === null || _b === void 0 ? void 0 : _b.file, this.type, this.crop_id, (_c = (yield this.mlModel)) === null || _c === void 0 ? void 0 : _c.id, true);
             }
             const fileModel = tf.io.fileSystem(dir);
             this.model = tf.loadLayersModel(fileModel);
@@ -71,6 +75,7 @@ class PredictService {
     }
     predict() {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log(this.type);
             switch (this.type) {
                 case "disease":
                     return yield this.disease();
@@ -85,11 +90,17 @@ class PredictService {
         return __awaiter(this, void 0, void 0, function* () {
             const stream = yield __1.bucket.file(this.path).download();
             const mlModel = yield this.mlModel;
+            const model = yield this.model;
             try {
+                const inputHeight = model.getLayer(undefined, 0).batchInputShape[1];
+                const inputWidth = model.getLayer(undefined, 0).batchInputShape[2];
+                const bufferResize = yield (0, sharp_1.default)(stream[0])
+                    .resize(inputHeight, inputWidth)
+                    .toBuffer();
                 const tensor = tf.node
-                    .decodeImage(stream[0], 3)
-                    .reshape([1, 150, 150, 3]);
-                const prediction = (yield this.model).predict(tensor);
+                    .decodeImage(bufferResize, 3)
+                    .reshape([1, inputHeight, inputWidth, 3]);
+                let prediction = model.predict(tensor);
                 const result = prediction.argMax(1).dataSync()[0];
                 const confidence = prediction.max(1).dataSync()[0] * 100;
                 const modelClass = yield __1.prisma.modelClass.findFirst({
@@ -109,7 +120,7 @@ class PredictService {
                 });
                 return {
                     path: this.path,
-                    result: (modelClass === null || modelClass === void 0 ? void 0 : modelClass.disease.name) === "Healthy" ? "Healthy" : "unhealthy",
+                    result: (modelClass === null || modelClass === void 0 ? void 0 : modelClass.disease.name) === "Healthy" ? "Healthy" : "Unhealthy",
                     disease: (modelClass === null || modelClass === void 0 ? void 0 : modelClass.disease.name) === "Healthy"
                         ? undefined
                         : modelClass === null || modelClass === void 0 ? void 0 : modelClass.disease,
@@ -117,7 +128,11 @@ class PredictService {
                 };
             }
             catch (error) {
-                console.log(error);
+                console.log(error.message);
+                return {
+                    success: false,
+                    error: error.message,
+                };
             }
             return true;
         });

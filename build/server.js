@@ -20,7 +20,11 @@ const init = () => __awaiter(void 0, void 0, void 0, function* () {
         host: "0.0.0.0",
         routes: {
             cors: {
-                origin: ["*"],
+                origin: [
+                    "http://localhost:3000",
+                    "http://dev.agronify.com",
+                    "https://dev.agronify.com",
+                ],
                 credentials: true,
             },
         },

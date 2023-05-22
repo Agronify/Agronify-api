@@ -44,7 +44,7 @@ init().then(async (server) => {
 
   server.state("token", {
     ttl: 1 * 60 * 60 * 1000,
-    isSecure: true,
+    isSecure: false,
     isHttpOnly: true,
     encoding: "none",
     clearInvalid: false,
@@ -69,7 +69,7 @@ init().then(async (server) => {
       payload: {
         parse: true,
         allow: "multipart/form-data",
-        maxBytes: 1024 * 1024 * 20,
+        maxBytes: 1024 * 1024 * 50,
         multipart: { output: "file" },
       },
     },

@@ -19,8 +19,8 @@ class MLModel {
             if (id) {
                 res = yield __1.prisma.mLModel.findUnique({
                     where: {
-                        id: parseInt(id)
-                    }
+                        id: parseInt(id),
+                    },
                 });
                 return res;
             }
@@ -30,72 +30,81 @@ class MLModel {
     }
     static post(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { name, type, file, active, input_height, input_width, class_amount, crop_id } = request.payload;
-            const res = yield __1.prisma.mLModel.create({
+            const { name, type, file, active, crop_id } = request.payload;
+            let res = yield __1.prisma.mLModel.create({
                 data: {
                     name,
                     type,
                     file,
                     active,
-                    inputHeight: input_height,
-                    inputWidth: input_width,
-                    classAmount: class_amount,
                     crop: {
                         connect: {
-                            id: parseInt(crop_id)
-                        }
-                    }
-                }
+                            id: parseInt(crop_id),
+                        },
+                    },
+                },
             });
             if (active) {
                 yield __1.prisma.mLModel.updateMany({
                     where: {
                         crop_id: parseInt(crop_id),
                         id: {
-                            not: res.id
-                        }
+                            not: res.id,
+                        },
                     },
                     data: {
-                        active: false
-                    }
+                        active: false,
+                    },
                 });
-                yield model_1.ModelUtils.downloadModel(file, type, crop_id);
             }
+            yield model_1.ModelUtils.downloadModel(file, type, crop_id, res.id, active);
+            yield model_1.ModelUtils.updateModelInfo(file, type, crop_id, res.id);
+            res = (yield __1.prisma.mLModel.findUnique({
+                where: {
+                    id: res.id,
+                },
+            }));
             return res;
         });
     }
     static put(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
             const { id } = request.params;
-            const { name, type, file, active, input_height, input_width, class_amount, crop_id } = request.payload;
-            const res = yield __1.prisma.mLModel.update({
+            const { name, type, file, active, crop_id } = request.payload;
+            let res = yield __1.prisma.mLModel.update({
                 where: {
-                    id: parseInt(id)
+                    id: parseInt(id),
                 },
                 data: {
                     name,
                     type,
                     file,
-                    inputHeight: input_height,
-                    inputWidth: input_width,
-                    classAmount: class_amount,
-                    active
-                }
+                    active,
+                },
             });
             if (active) {
-                yield __1.prisma.mLModel.updateMany({
-                    where: {
-                        crop_id: parseInt(crop_id),
-                        id: {
-                            not: res.id
-                        }
-                    },
-                    data: {
-                        active: false
-                    }
-                });
-                yield model_1.ModelUtils.downloadModel(file, type, crop_id);
+                try {
+                    yield __1.prisma.mLModel.updateMany({
+                        where: {
+                            crop_id: parseInt(crop_id),
+                            id: {
+                                not: res.id,
+                            },
+                        },
+                        data: {
+                            active: false,
+                        },
+                    });
+                }
+                catch (error) { }
             }
+            yield model_1.ModelUtils.downloadModel(res.file, res.type, res.crop_id, res.id, active);
+            yield model_1.ModelUtils.updateModelInfo(res.file, res.type, res.crop_id, res.id);
+            res = (yield __1.prisma.mLModel.findUnique({
+                where: {
+                    id: res.id,
+                },
+            }));
             return res;
         });
     }
@@ -106,21 +115,21 @@ class MLModel {
                 where: {
                     AND: [
                         {
-                            id: parseInt(id)
+                            id: parseInt(id),
                         },
                         {
-                            active: false
-                        }
-                    ]
-                }
+                            active: false,
+                        },
+                    ],
+                },
             });
             if (!mlmodel) {
                 return { error: "Cannot delete active model" };
             }
             const res = yield __1.prisma.mLModel.delete({
                 where: {
-                    id: mlmodel === null || mlmodel === void 0 ? void 0 : mlmodel.id
-                }
+                    id: mlmodel === null || mlmodel === void 0 ? void 0 : mlmodel.id,
+                },
             });
             return res;
         });

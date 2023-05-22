@@ -83,6 +83,7 @@ dotenv.config();
         encoding: "none",
         clearInvalid: false,
         strictHeader: true,
+        isSameSite: "None",
         path: "/",
     });
     server.route({
@@ -100,7 +101,7 @@ dotenv.config();
             payload: {
                 parse: true,
                 allow: "multipart/form-data",
-                maxBytes: 1024 * 1024 * 20,
+                maxBytes: 1024 * 1024 * 50,
                 multipart: { output: "file" },
             },
         },
@@ -266,9 +267,10 @@ dotenv.config();
         path: "/{any*}",
         handler: function (request, h) {
             const response = h.response();
-            response.header("Access-Control-Allow-Origin", "*");
+            response.header("Access-Control-Allow-Origin", request.headers.origin || "*");
             response.header("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
             response.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+            response.header("Access-Control-Allow-Credentials", "true");
             return response;
         },
         options: {

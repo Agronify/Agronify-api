@@ -3,6 +3,7 @@ import * as fs from "fs";
 import { bucket, prisma } from "..";
 import { MLModel } from "@prisma/client";
 import { ModelUtils } from "../utils/model";
+import sharp from "sharp";
 export default class PredictService {
   private path: string;
   private type: string;
@@ -33,14 +34,20 @@ export default class PredictService {
   }
 
   public async init() {
-    let dir = `./models/${this.type}/${this.crop_id}/active/model.json`;
+    let dir = `./models/${this.type}/${this.crop_id}/${
+      (await this.mlModel)?.id
+    }/model.json`;
     if (!fs.existsSync(dir)) {
       await ModelUtils.downloadModel(
         (
           await this.mlModel
         )?.file!,
         this.type,
-        this.crop_id
+        this.crop_id,
+        (
+          await this.mlModel
+        )?.id!,
+        true
       );
     }
     const fileModel = tf.io.fileSystem(dir);
@@ -48,6 +55,7 @@ export default class PredictService {
   }
 
   public async predict() {
+    console.log(this.type);
     switch (this.type) {
       case "disease":
         return await this.disease();
@@ -61,13 +69,17 @@ export default class PredictService {
   public async disease() {
     const stream = await bucket.file(this.path).download();
     const mlModel = await this.mlModel;
+    const model = await this.model;
     try {
+      const inputHeight = model.getLayer(undefined, 0).batchInputShape[1];
+      const inputWidth = model.getLayer(undefined, 0).batchInputShape[2];
+      const bufferResize = await sharp(stream[0])
+        .resize(inputHeight, inputWidth)
+        .toBuffer();
       const tensor = tf.node
-        .decodeImage(stream[0], 3)
-        .reshape([1, 150, 150, 3]);
-      const prediction = (await this.model).predict(
-        tensor
-      ) as tf.Tensor<tf.Rank>;
+        .decodeImage(bufferResize, 3)
+        .reshape([1, inputHeight!, inputWidth!, 3]);
+      let prediction = model.predict(tensor) as tf.Tensor<tf.Rank>;
       const result = prediction.argMax(1).dataSync()[0];
       const confidence = prediction.max(1).dataSync()[0] * 100;
       const modelClass = await prisma.modelClass.findFirst({
@@ -88,15 +100,19 @@ export default class PredictService {
       return {
         path: this.path,
         result:
-          modelClass?.disease.name === "Healthy" ? "Healthy" : "unhealthy",
+          modelClass?.disease.name === "Healthy" ? "Healthy" : "Unhealthy",
         disease:
           modelClass?.disease.name === "Healthy"
             ? undefined
             : modelClass?.disease,
         confidence: confidence,
       };
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      console.log(error.message);
+      return {
+        success: false,
+        error: error.message,
+      };
     }
     return true;
   }

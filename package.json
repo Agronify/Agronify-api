@@ -33,6 +33,7 @@
     "hapi-auth-jwt2": "^10.4.0",
     "jsonwebtoken": "^9.0.0",
     "mv": "^2.1.1",
+    "sharp": "^0.32.1",
     "typescript": "^5.0.4"
   }
 }
