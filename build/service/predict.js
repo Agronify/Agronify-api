@@ -65,12 +65,18 @@ class PredictService {
     init() {
         var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
+            console.log("Init model predict");
             let dir = `./models/${this.type}/${this.crop_id}/${(_a = (yield this.mlModel)) === null || _a === void 0 ? void 0 : _a.id}/model.json`;
             if (!fs.existsSync(dir)) {
                 yield model_1.ModelUtils.downloadModel((_b = (yield this.mlModel)) === null || _b === void 0 ? void 0 : _b.file, this.type, this.crop_id, (_c = (yield this.mlModel)) === null || _c === void 0 ? void 0 : _c.id, true);
             }
-            const fileModel = tf.io.fileSystem(dir);
-            this.model = tf.loadLayersModel(fileModel);
+            try {
+                const fileModel = tf.io.fileSystem(dir);
+                this.model = tf.loadLayersModel(fileModel);
+            }
+            catch (error) {
+                console.log(error);
+            }
         });
     }
     predict() {
@@ -88,6 +94,7 @@ class PredictService {
     }
     disease() {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log("Predict disease");
             const stream = yield __1.bucket.file(this.path).download();
             const mlModel = yield this.mlModel;
             const model = yield this.model;

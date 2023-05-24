@@ -34,6 +34,7 @@ export default class PredictService {
   }
 
   public async init() {
+    console.log("Init model predict")
     let dir = `./models/${this.type}/${this.crop_id}/${
       (await this.mlModel)?.id
     }/model.json`;
@@ -50,8 +51,12 @@ export default class PredictService {
         true
       );
     }
-    const fileModel = tf.io.fileSystem(dir);
-    this.model = tf.loadLayersModel(fileModel);
+    try {
+      const fileModel = tf.io.fileSystem(dir);
+      this.model = tf.loadLayersModel(fileModel);
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   public async predict() {
@@ -67,6 +72,8 @@ export default class PredictService {
   }
 
   public async disease() {
+    
+    console.log("Predict disease")
     const stream = await bucket.file(this.path).download();
     const mlModel = await this.mlModel;
     const model = await this.model;

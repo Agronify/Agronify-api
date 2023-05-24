@@ -44,7 +44,7 @@ init().then(async (server) => {
 
   server.state("token", {
     ttl: 1 * 60 * 60 * 1000,
-    isSecure: false,
+    isSecure: true,
     isHttpOnly: true,
     encoding: "none",
     clearInvalid: false,
@@ -58,7 +58,8 @@ init().then(async (server) => {
     path: "/v1/weather",
     handler: Weather.get,
     options: {
-      auth: false,
+
+            auth: false,
     },
   });
 

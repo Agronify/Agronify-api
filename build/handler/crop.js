@@ -18,8 +18,8 @@ class Crop {
             if (id) {
                 res = yield __1.prisma.crop.findUnique({
                     where: {
-                        id: parseInt(id)
-                    }
+                        id: parseInt(id),
+                    },
                 });
                 return res;
             }
@@ -30,11 +30,11 @@ class Crop {
                         OR: [
                             {
                                 name: {
-                                    search: search
-                                }
-                            }
-                        ]
-                    }
+                                    search: search,
+                                },
+                            },
+                        ],
+                    },
                 });
                 return res;
             }
@@ -44,14 +44,15 @@ class Crop {
     }
     static post(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { name, type, description, image } = request.payload;
+            const { name, type, description, image, is_fruit } = request.payload;
             const res = yield __1.prisma.crop.create({
                 data: {
                     name,
                     type,
                     description,
-                    image
-                }
+                    image,
+                    is_fruit,
+                },
             });
             return res;
         });
@@ -59,17 +60,18 @@ class Crop {
     static put(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
             const { id } = request.params;
-            const { name, type, description, image } = request.payload;
+            const { name, type, description, image, is_fruit } = request.payload;
             const res = yield __1.prisma.crop.update({
                 where: {
-                    id: parseInt(id)
+                    id: parseInt(id),
                 },
                 data: {
                     name,
                     description,
                     image,
-                    type
-                }
+                    type,
+                    is_fruit,
+                },
             });
             return res;
         });
@@ -79,8 +81,8 @@ class Crop {
             const { id } = request.params;
             const res = yield __1.prisma.crop.delete({
                 where: {
-                    id: parseInt(id)
-                }
+                    id: parseInt(id),
+                },
             });
             return res;
         });

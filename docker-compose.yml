@@ -11,6 +11,7 @@ services:
     working_dir: /app
     volumes:
       - ./:/app
+      - ./google-cloud-key.json:/app/build/google-cloud-key.json
     restart: always
     command: 
      - bash

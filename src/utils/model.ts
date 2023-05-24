@@ -19,7 +19,8 @@ export class ModelUtils {
         fs.unlinkSync(dir);
       } catch (error) {}
       let extracted = false;
-      bucket
+      try {
+        bucket
         .file(file)
         .download({ destination: tmp_name }, async function (err) {
           exec(
@@ -29,6 +30,9 @@ export class ModelUtils {
               dir
           );
         });
+      } catch (error) {
+        console.log("Download error ",error);
+      }
       while (!extracted) {
         await new Promise((resolve) => setTimeout(resolve, 1000));
         if (fs.existsSync(dir)) {

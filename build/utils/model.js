@@ -52,16 +52,21 @@ class ModelUtils {
                 }
                 catch (error) { }
                 let extracted = false;
-                __1.bucket
-                    .file(file)
-                    .download({ destination: tmp_name }, function (err) {
-                    return __awaiter(this, void 0, void 0, function* () {
-                        (0, child_process_1.exec)("tensorflowjs_converter --input_format=keras " +
-                            tmp_name +
-                            " " +
-                            dir);
+                try {
+                    __1.bucket
+                        .file(file)
+                        .download({ destination: tmp_name }, function (err) {
+                        return __awaiter(this, void 0, void 0, function* () {
+                            (0, child_process_1.exec)("tensorflowjs_converter --input_format=keras " +
+                                tmp_name +
+                                " " +
+                                dir);
+                        });
                     });
-                });
+                }
+                catch (error) {
+                    console.log("Download error ", error);
+                }
                 while (!extracted) {
                     yield new Promise((resolve) => setTimeout(resolve, 1000));
                     if (fs_1.default.existsSync(dir)) {
