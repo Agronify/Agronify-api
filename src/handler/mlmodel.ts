@@ -13,10 +13,17 @@ export default class MLModel {
         where: {
           id: parseInt(id),
         },
+        include: {
+          crop: true,
+        },
       });
       return res;
     }
-    res = prisma.mLModel.findMany();
+    res = prisma.mLModel.findMany({
+      include: {
+        crop: true,
+      },
+    });
     return res;
   }
 
@@ -100,6 +107,9 @@ export default class MLModel {
     res = (await prisma.mLModel.findUnique({
       where: {
         id: res.id,
+      },
+      include: {
+        crop: true,
       },
     }))!;
     return res;

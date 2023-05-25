@@ -19,7 +19,6 @@ class AuthUtils {
             return jsonwebtoken_1.default.sign({
                 id: user.id,
                 email: user.email,
-                phone: user.phone,
                 name: user.name,
                 is_admin: user.is_admin,
             }, process.env.JWT_SECRET, {

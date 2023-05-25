@@ -21,10 +21,17 @@ class MLModel {
                     where: {
                         id: parseInt(id),
                     },
+                    include: {
+                        crop: true,
+                    },
                 });
                 return res;
             }
-            res = __1.prisma.mLModel.findMany();
+            res = __1.prisma.mLModel.findMany({
+                include: {
+                    crop: true,
+                },
+            });
             return res;
         });
     }
@@ -103,6 +110,9 @@ class MLModel {
             res = (yield __1.prisma.mLModel.findUnique({
                 where: {
                     id: res.id,
+                },
+                include: {
+                    crop: true,
                 },
             }));
             return res;

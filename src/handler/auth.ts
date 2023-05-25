@@ -49,7 +49,6 @@ export default class Auth {
         data: {
           name,
           email,
-          phone,
           password: await bcrypt.hash(password, 10),
         },
       });

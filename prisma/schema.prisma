@@ -63,8 +63,8 @@ model ModelClass {
   id         Int         @id @default(autoincrement())
   mlmodel    MLModel     @relation(fields: [mlmodel_id], references: [id])
   mlmodel_id Int
-  disease    CropDisease @relation(fields: [disease_id], references: [id])
-  disease_id Int
+  disease    CropDisease? @relation(fields: [disease_id], references: [id])
+  disease_id Int?
   index      Int
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @default(now()) @updatedAt
@@ -74,9 +74,8 @@ model User {
   id        Int      @id @default(autoincrement())
   name      String
   email     String   @unique
-  phone     String   @unique
   password  String?
-  is_admin   Boolean  @default(false)
+  is_admin  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 }

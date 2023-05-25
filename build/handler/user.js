@@ -18,8 +18,8 @@ class User {
             if (id) {
                 res = yield __1.prisma.user.findUnique({
                     where: {
-                        id: parseInt(id)
-                    }
+                        id: parseInt(id),
+                    },
                 });
                 return res;
             }
@@ -34,10 +34,9 @@ class User {
                 data: {
                     name,
                     email,
-                    phone,
                     password,
-                    is_admin
-                }
+                    is_admin,
+                },
             });
             return res;
         });
@@ -48,14 +47,13 @@ class User {
             const { name, email, password, phone, is_admin } = request.payload;
             const res = yield __1.prisma.user.update({
                 where: {
-                    id: parseInt(id)
+                    id: parseInt(id),
                 },
                 data: {
                     name,
                     email,
-                    phone,
-                    password
-                }
+                    password,
+                },
             });
             return res;
         });
@@ -65,8 +63,8 @@ class User {
             const { id } = request.params;
             const res = yield __1.prisma.user.delete({
                 where: {
-                    id: parseInt(id)
-                }
+                    id: parseInt(id),
+                },
             });
             return res;
         });

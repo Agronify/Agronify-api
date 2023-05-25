@@ -17,6 +17,10 @@ export class ModelClass {
             },
           ],
         },
+        include: {
+          disease: true,
+          
+        }
       });
       return res;
     }

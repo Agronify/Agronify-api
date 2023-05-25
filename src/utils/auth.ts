@@ -6,7 +6,6 @@ export default class AuthUtils {
       {
         id: user.id,
         email: user.email,
-        phone: user.phone,
         name: user.name,
         is_admin: user.is_admin,
       },

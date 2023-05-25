@@ -95,7 +95,6 @@ class Auth {
                     data: {
                         name,
                         email,
-                        phone,
                         password: yield bcrypt.hash(password, 10),
                     },
                 });
