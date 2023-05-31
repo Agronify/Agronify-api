@@ -123,14 +123,13 @@ export default class MLModel {
           {
             id: parseInt(id),
           },
-          {
-            active: false,
-          },
         ],
       },
     });
-    if (!mlmodel) {
-      return { error: "Cannot delete active model" };
+    if (mlmodel?.active) {
+      return {
+        error: "Cannot delete active model",
+      };
     }
     const res = await prisma.mLModel.delete({
       where: {

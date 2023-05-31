@@ -34,7 +34,7 @@ export default class PredictService {
   }
 
   public async init() {
-    console.log("Init model predict")
+    console.log("Init model predict");
     let dir = `./models/${this.type}/${this.crop_id}/${
       (await this.mlModel)?.id
     }/model.json`;
@@ -55,7 +55,7 @@ export default class PredictService {
       const fileModel = tf.io.fileSystem(dir);
       this.model = tf.loadLayersModel(fileModel);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   }
 
@@ -72,8 +72,7 @@ export default class PredictService {
   }
 
   public async disease() {
-    
-    console.log("Predict disease")
+    console.log("Predict disease");
     const stream = await bucket.file(this.path).download();
     const mlModel = await this.mlModel;
     const model = await this.model;
@@ -89,12 +88,9 @@ export default class PredictService {
       let prediction = model.predict(tensor) as tf.Tensor<tf.Rank>;
       const result = prediction.argMax(1).dataSync()[0];
       const confidence = prediction.max(1).dataSync()[0] * 100;
-      const modelClass = await prisma.modelClass.findFirst({
+      const modelClasses = await prisma.modelClass.findMany({
         where: {
           AND: [
-            {
-              index: result,
-            },
             {
               mlmodel_id: mlModel?.id,
             },
@@ -104,14 +100,24 @@ export default class PredictService {
           disease: true,
         },
       });
+
+      const classHealthy = modelClasses.find((modelClass) => {
+        return modelClass.disease_id === null;
+      });
+
+      console.log(classHealthy?.index);
+
       return {
         path: this.path,
-        result:
-          modelClass?.disease.name === "Healthy" ? "Healthy" : "Unhealthy",
+        result: result === classHealthy?.index ? "Healthy" : "Unhealthy",
         disease:
-          modelClass?.disease.name === "Healthy"
+          modelClasses.find((modelClass) => {
+            return modelClass.index === result;
+          })?.disease_id === null
             ? undefined
-            : modelClass?.disease,
+            : modelClasses.find((modelClass) => {
+                return modelClass.index === result;
+              })?.disease,
         confidence: confidence,
       };
     } catch (error: any) {
@@ -121,7 +127,6 @@ export default class PredictService {
         error: error.message,
       };
     }
-    return true;
   }
 
   public async ripeness() {

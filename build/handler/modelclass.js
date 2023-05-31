@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ModelClass = void 0;
 const __1 = require("..");
+const client_1 = require("@prisma/client");
 class ModelClass {
     static get(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -30,13 +31,16 @@ class ModelClass {
                     },
                     include: {
                         disease: true,
-                    }
+                    },
                 });
                 return res;
             }
             res = __1.prisma.modelClass.findMany({
                 where: {
                     mlmodel_id: parseInt(mlmodel_id),
+                },
+                include: {
+                    disease: true,
                 },
             });
             return res;
@@ -64,11 +68,13 @@ class ModelClass {
                             id: parseInt(mlmodel_id),
                         },
                     },
-                    disease: {
-                        connect: {
-                            id: parseInt(disease_id),
-                        },
-                    },
+                    disease: disease_id > 0
+                        ? {
+                            connect: {
+                                id: parseInt(disease_id),
+                            },
+                        }
+                        : undefined,
                 },
             });
             return res;
@@ -94,13 +100,21 @@ class ModelClass {
                 },
                 data: {
                     index,
-                    disease: {
-                        connect: {
-                            id: parseInt(disease_id),
-                        },
-                    },
+                    disease: disease_id > 0
+                        ? {
+                            connect: {
+                                id: parseInt(disease_id),
+                            },
+                        }
+                        : undefined,
                 },
             });
+            if (disease_id <= 0) {
+                const sql = client_1.Prisma.sql([
+                    `UPDATE "public"."ModelClass" SET disease_id = NULL WHERE id = ${id};`,
+                ]);
+                yield __1.prisma.$executeRaw(sql);
+            }
             return res;
         });
     }

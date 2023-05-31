@@ -93,6 +93,7 @@ class PredictService {
         });
     }
     disease() {
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             console.log("Predict disease");
             const stream = yield __1.bucket.file(this.path).download();
@@ -110,12 +111,9 @@ class PredictService {
                 let prediction = model.predict(tensor);
                 const result = prediction.argMax(1).dataSync()[0];
                 const confidence = prediction.max(1).dataSync()[0] * 100;
-                const modelClass = yield __1.prisma.modelClass.findFirst({
+                const modelClasses = yield __1.prisma.modelClass.findMany({
                     where: {
                         AND: [
-                            {
-                                index: result,
-                            },
                             {
                                 mlmodel_id: mlModel === null || mlModel === void 0 ? void 0 : mlModel.id,
                             },
@@ -125,12 +123,20 @@ class PredictService {
                         disease: true,
                     },
                 });
+                const classHealthy = modelClasses.find((modelClass) => {
+                    return modelClass.disease_id === null;
+                });
+                console.log(classHealthy === null || classHealthy === void 0 ? void 0 : classHealthy.index);
                 return {
                     path: this.path,
-                    result: (modelClass === null || modelClass === void 0 ? void 0 : modelClass.disease.name) === "Healthy" ? "Healthy" : "Unhealthy",
-                    disease: (modelClass === null || modelClass === void 0 ? void 0 : modelClass.disease.name) === "Healthy"
+                    result: result === (classHealthy === null || classHealthy === void 0 ? void 0 : classHealthy.index) ? "Healthy" : "Unhealthy",
+                    disease: ((_a = modelClasses.find((modelClass) => {
+                        return modelClass.index === result;
+                    })) === null || _a === void 0 ? void 0 : _a.disease_id) === null
                         ? undefined
-                        : modelClass === null || modelClass === void 0 ? void 0 : modelClass.disease,
+                        : (_b = modelClasses.find((modelClass) => {
+                            return modelClass.index === result;
+                        })) === null || _b === void 0 ? void 0 : _b.disease,
                     confidence: confidence,
                 };
             }
@@ -141,7 +147,6 @@ class PredictService {
                     error: error.message,
                 };
             }
-            return true;
         });
     }
     ripeness() {

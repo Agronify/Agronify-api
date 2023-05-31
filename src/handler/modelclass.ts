@@ -1,5 +1,6 @@
 import { Request, ResponseToolkit } from "@hapi/hapi";
 import { prisma } from "..";
+import { Prisma } from "@prisma/client";
 
 export class ModelClass {
   public static async get(request: Request, response: ResponseToolkit) {
@@ -19,14 +20,16 @@ export class ModelClass {
         },
         include: {
           disease: true,
-          
-        }
+        },
       });
       return res;
     }
     res = prisma.modelClass.findMany({
       where: {
         mlmodel_id: parseInt(mlmodel_id),
+      },
+      include: {
+        disease: true,
       },
     });
     return res;
@@ -53,11 +56,14 @@ export class ModelClass {
             id: parseInt(mlmodel_id),
           },
         },
-        disease: {
-          connect: {
-            id: parseInt(disease_id),
-          },
-        },
+        disease:
+          disease_id > 0
+            ? {
+                connect: {
+                  id: parseInt(disease_id),
+                },
+              }
+            : undefined,
       },
     });
     return res;
@@ -82,13 +88,24 @@ export class ModelClass {
       },
       data: {
         index,
-        disease: {
-          connect: {
-            id: parseInt(disease_id),
-          },
-        },
+        disease:
+          disease_id > 0
+            ? {
+                connect: {
+                  id: parseInt(disease_id),
+                },
+              }
+            : undefined,
       },
     });
+
+    if (disease_id <= 0) {
+      const sql = Prisma.sql([
+        `UPDATE "public"."ModelClass" SET disease_id = NULL WHERE id = ${id};`,
+      ]);
+      await prisma.$executeRaw(sql);
+    }
+
     return res;
   }
 

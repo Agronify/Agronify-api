@@ -60,14 +60,14 @@ model MLModel {
 }
 
 model ModelClass {
-  id         Int         @id @default(autoincrement())
-  mlmodel    MLModel     @relation(fields: [mlmodel_id], references: [id])
+  id         Int          @id @default(autoincrement())
+  mlmodel    MLModel      @relation(fields: [mlmodel_id], references: [id], onDelete: Cascade)
   mlmodel_id Int
-  disease    CropDisease? @relation(fields: [disease_id], references: [id])
+  disease    CropDisease? @relation(fields: [disease_id], references: [id], onDelete: SetNull)
   disease_id Int?
   index      Int
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @default(now()) @updatedAt
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @default(now()) @updatedAt
 }
 
 model User {

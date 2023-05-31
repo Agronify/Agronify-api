@@ -21,17 +21,17 @@ export class ModelUtils {
       let extracted = false;
       try {
         bucket
-        .file(file)
-        .download({ destination: tmp_name }, async function (err) {
-          exec(
-            "tensorflowjs_converter --input_format=keras " +
-              tmp_name +
-              " " +
-              dir
-          );
-        });
+          .file(file)
+          .download({ destination: tmp_name }, async function (err) {
+            exec(
+              "tensorflowjs_converter --input_format=keras " +
+                tmp_name +
+                " " +
+                dir
+            );
+          });
       } catch (error) {
-        console.log("Download error ",error);
+        console.log("Download error ", error);
       }
       while (!extracted) {
         await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -69,5 +69,20 @@ export class ModelUtils {
       },
       data: modelInfo,
     });
+
+    await prisma.modelClass.deleteMany({
+      where: {
+        mlmodel_id: model_id,
+      },
+    });
+
+    for (let i = 0; i < classAmount; i++) {
+      await prisma.modelClass.create({
+        data: {
+          mlmodel_id: model_id,
+          index: i,
+        },
+      });
+    }
   }
 }

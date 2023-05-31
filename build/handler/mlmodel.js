@@ -127,14 +127,13 @@ class MLModel {
                         {
                             id: parseInt(id),
                         },
-                        {
-                            active: false,
-                        },
                     ],
                 },
             });
-            if (!mlmodel) {
-                return { error: "Cannot delete active model" };
+            if (mlmodel === null || mlmodel === void 0 ? void 0 : mlmodel.active) {
+                return {
+                    error: "Cannot delete active model",
+                };
             }
             const res = yield __1.prisma.mLModel.delete({
                 where: {

@@ -100,6 +100,19 @@ class ModelUtils {
                 },
                 data: modelInfo,
             });
+            yield __1.prisma.modelClass.deleteMany({
+                where: {
+                    mlmodel_id: model_id,
+                },
+            });
+            for (let i = 0; i < classAmount; i++) {
+                yield __1.prisma.modelClass.create({
+                    data: {
+                        mlmodel_id: model_id,
+                        index: i,
+                    },
+                });
+            }
         });
     }
 }
