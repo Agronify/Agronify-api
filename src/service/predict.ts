@@ -82,9 +82,12 @@ export default class PredictService {
       const bufferResize = await sharp(stream[0])
         .resize(inputHeight, inputWidth)
         .toBuffer();
-      const tensor = tf.node
+      let tensor = tf.node
         .decodeImage(bufferResize, 3)
         .reshape([1, inputHeight!, inputWidth!, 3]);
+
+      if (mlModel?.normalize) tensor = tensor.div(tf.scalar(255));
+
       let prediction = model.predict(tensor) as tf.Tensor<tf.Rank>;
       const result = prediction.argMax(1).dataSync()[0];
       const confidence = prediction.max(1).dataSync()[0] * 100;
