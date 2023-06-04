@@ -54,6 +54,8 @@ model MLModel {
   inputWidth  Int?
   inputHeight Int?
   classAmount Int?
+  normalize   Boolean      @default(false)
+  threshold   Float?       @default(90)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @default(now()) @updatedAt
   ModelClass  ModelClass[]

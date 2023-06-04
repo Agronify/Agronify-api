@@ -88,6 +88,15 @@ export default class PredictService {
       let prediction = model.predict(tensor) as tf.Tensor<tf.Rank>;
       const result = prediction.argMax(1).dataSync()[0];
       const confidence = prediction.max(1).dataSync()[0] * 100;
+
+      if (mlModel?.threshold && confidence < mlModel?.threshold) {
+        return {
+          path: this.path,
+          result: "NOT DETECTED",
+          confidence: confidence,
+        };
+      }
+
       const modelClasses = await prisma.modelClass.findMany({
         where: {
           AND: [
