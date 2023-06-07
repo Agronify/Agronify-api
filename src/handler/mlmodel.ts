@@ -28,13 +28,16 @@ export default class MLModel {
   }
 
   public static async post(request: Request, response: ResponseToolkit) {
-    const { name, type, file, active, crop_id } = request.payload as any;
+    const { name, type, file, active, normalize, threshold, crop_id } =
+      request.payload as any;
     let res = await prisma.mLModel.create({
       data: {
         name,
         type,
         file,
         active,
+        threshold,
+        normalize,
         crop: {
           connect: {
             id: parseInt(crop_id),
@@ -69,7 +72,8 @@ export default class MLModel {
 
   public static async put(request: Request, response: ResponseToolkit) {
     const { id } = request.params as any;
-    const { name, type, file, active, crop_id } = request.payload as any;
+    const { name, type, file, active, threshold, normalize, crop_id } =
+      request.payload as any;
     let res = await prisma.mLModel.update({
       where: {
         id: parseInt(id),
@@ -79,6 +83,8 @@ export default class MLModel {
         type,
         file,
         active,
+        threshold,
+        normalize,
       },
     });
     if (active) {

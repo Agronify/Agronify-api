@@ -58,8 +58,7 @@ init().then(async (server) => {
     path: "/v1/weather",
     handler: Weather.get,
     options: {
-
-            auth: false,
+      auth: false,
     },
   });
 
@@ -70,7 +69,7 @@ init().then(async (server) => {
       payload: {
         parse: true,
         allow: "multipart/form-data",
-        maxBytes: 1024 * 1024 * 50,
+        maxBytes: 1024 * 1024 * 250,
         multipart: { output: "file" },
       },
     },

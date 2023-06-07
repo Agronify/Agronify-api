@@ -95,7 +95,6 @@ class PredictService {
     disease() {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("Predict disease");
             const stream = yield __1.bucket.file(this.path).download();
             const mlModel = yield this.mlModel;
             const model = yield this.model;
@@ -105,12 +104,21 @@ class PredictService {
                 const bufferResize = yield (0, sharp_1.default)(stream[0])
                     .resize(inputHeight, inputWidth)
                     .toBuffer();
-                const tensor = tf.node
+                let tensor = tf.node
                     .decodeImage(bufferResize, 3)
                     .reshape([1, inputHeight, inputWidth, 3]);
+                if (mlModel === null || mlModel === void 0 ? void 0 : mlModel.normalize)
+                    tensor = tensor.div(tf.scalar(255));
                 let prediction = model.predict(tensor);
                 const result = prediction.argMax(1).dataSync()[0];
                 const confidence = prediction.max(1).dataSync()[0] * 100;
+                if ((mlModel === null || mlModel === void 0 ? void 0 : mlModel.threshold) && confidence < (mlModel === null || mlModel === void 0 ? void 0 : mlModel.threshold)) {
+                    return {
+                        path: this.path,
+                        result: "NOT DETECTED",
+                        confidence: confidence,
+                    };
+                }
                 const modelClasses = yield __1.prisma.modelClass.findMany({
                     where: {
                         AND: [
@@ -126,7 +134,6 @@ class PredictService {
                 const classHealthy = modelClasses.find((modelClass) => {
                     return modelClass.disease_id === null;
                 });
-                console.log(classHealthy === null || classHealthy === void 0 ? void 0 : classHealthy.index);
                 return {
                     path: this.path,
                     result: result === (classHealthy === null || classHealthy === void 0 ? void 0 : classHealthy.index) ? "Healthy" : "Unhealthy",

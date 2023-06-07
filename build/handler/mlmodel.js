@@ -37,13 +37,15 @@ class MLModel {
     }
     static post(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { name, type, file, active, crop_id } = request.payload;
+            const { name, type, file, active, normalize, threshold, crop_id } = request.payload;
             let res = yield __1.prisma.mLModel.create({
                 data: {
                     name,
                     type,
                     file,
                     active,
+                    threshold,
+                    normalize,
                     crop: {
                         connect: {
                             id: parseInt(crop_id),
@@ -77,7 +79,7 @@ class MLModel {
     static put(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
             const { id } = request.params;
-            const { name, type, file, active, crop_id } = request.payload;
+            const { name, type, file, active, threshold, normalize, crop_id } = request.payload;
             let res = yield __1.prisma.mLModel.update({
                 where: {
                     id: parseInt(id),
@@ -87,6 +89,8 @@ class MLModel {
                     type,
                     file,
                     active,
+                    threshold,
+                    normalize,
                 },
             });
             if (active) {

@@ -72,7 +72,6 @@ export default class PredictService {
   }
 
   public async disease() {
-    console.log("Predict disease");
     const stream = await bucket.file(this.path).download();
     const mlModel = await this.mlModel;
     const model = await this.model;
@@ -116,8 +115,6 @@ export default class PredictService {
       const classHealthy = modelClasses.find((modelClass) => {
         return modelClass.disease_id === null;
       });
-
-      console.log(classHealthy?.index);
 
       return {
         path: this.path,

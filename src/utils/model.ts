@@ -70,19 +70,27 @@ export class ModelUtils {
       data: modelInfo,
     });
 
-    await prisma.modelClass.deleteMany({
+    const oldClassModel = await prisma.modelClass.findMany({
       where: {
         mlmodel_id: model_id,
       },
     });
 
-    for (let i = 0; i < classAmount; i++) {
-      await prisma.modelClass.create({
-        data: {
+    if (classAmount != oldClassModel.length) {
+      await prisma.modelClass.deleteMany({
+        where: {
           mlmodel_id: model_id,
-          index: i,
         },
       });
+
+      for (let i = 0; i < classAmount; i++) {
+        await prisma.modelClass.create({
+          data: {
+            mlmodel_id: model_id,
+            index: i,
+          },
+        });
+      }
     }
   }
 }
