@@ -70,7 +70,7 @@ init().then(async (server) => {
         parse: true,
         allow: "multipart/form-data",
         maxBytes: 1024 * 1024 * 250,
-        multipart: { output: "file" },
+        multipart: { output: "stream" },
       },
     },
     handler: new GuardService(Upload.upload, "User").handler,

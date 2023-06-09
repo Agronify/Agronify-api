@@ -32,28 +32,32 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const fs = __importStar(require("fs"));
 const __1 = require("..");
+const stream = __importStar(require("stream"));
 class Upload {
     static upload(request, response) {
         return __awaiter(this, void 0, void 0, function* () {
             const { file, type } = request.payload;
+            const passThrough = new stream.PassThrough();
+            passThrough.write(file._data);
+            passThrough.end();
             if (!["predicts", "models", "images"].includes(type)) {
                 return response.response({ error: "invalid type" });
             }
-            const filename = `${Date.now()}-${file.filename}`;
+            const filename = `${Date.now()}-${file.hapi.filename}`;
             const fullpath = type + "/" + filename;
-            const blob = __1.bucket.file(fullpath);
-            const fileStream = fs.readFileSync(file.path);
-            const blobStream = blob.createWriteStream({
-                resumable: false,
-            });
+            const fileStream = __1.bucket.file(fullpath);
+            const blobStream = passThrough.pipe(fileStream.createWriteStream());
+            // const fileStream = fs.readFileSync(file.path);
+            // const blobStream = blob.createWriteStream({
+            //   resumable: false,
+            // });
             let done = false;
             let error = false;
             blobStream.on("finish", () => {
                 done = true;
                 if (type !== "models") {
-                    blob.makePublic();
+                    fileStream.makePublic();
                 }
             });
             blobStream.on("error", (err) => {
@@ -61,10 +65,6 @@ class Upload {
                 error = true;
                 console.log(err);
             });
-            blobStream.end(Buffer.from(fileStream));
-            while (!done) {
-                yield new Promise((resolve) => setTimeout(resolve, 10));
-            }
             return response.response(error
                 ? { error: "Error uploading file" }
                 : {

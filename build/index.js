@@ -101,8 +101,8 @@ dotenv.config();
             payload: {
                 parse: true,
                 allow: "multipart/form-data",
-                maxBytes: 1024 * 1024 * 50,
-                multipart: { output: "file" },
+                maxBytes: 1024 * 1024 * 250,
+                multipart: { output: "stream" },
             },
         },
         handler: new guard_1.GuardService(upload_1.default.upload, "User").handler,

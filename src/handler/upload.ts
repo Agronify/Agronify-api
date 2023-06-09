@@ -2,26 +2,35 @@ import { ReqRefDefaults, Request, ResponseToolkit } from "@hapi/hapi";
 import * as fs from "fs";
 import { Storage } from "@google-cloud/storage";
 import { bucket } from "..";
+import * as stream from "stream";
 
 export default class Upload {
   public static async upload(request: Request, response: ResponseToolkit) {
     const { file, type } = request.payload as any;
+
+    const passThrough = new stream.PassThrough();
+    passThrough.write(file._data);
+    passThrough.end();
+
     if (!["predicts", "models", "images"].includes(type)) {
       return response.response({ error: "invalid type" });
     }
-    const filename = `${Date.now()}-${file.filename}`;
+    const filename = `${Date.now()}-${file.hapi.filename}`;
     const fullpath = type + "/" + filename;
-    const blob = bucket.file(fullpath);
-    const fileStream = fs.readFileSync(file.path);
-    const blobStream = blob.createWriteStream({
-      resumable: false,
-    });
+    const fileStream = bucket.file(fullpath);
+
+    const blobStream = passThrough.pipe(fileStream.createWriteStream());
+
+    // const fileStream = fs.readFileSync(file.path);
+    // const blobStream = blob.createWriteStream({
+    //   resumable: false,
+    // });
     let done = false;
     let error = false;
     blobStream.on("finish", () => {
       done = true;
       if (type !== "models") {
-        blob.makePublic();
+        fileStream.makePublic();
       }
     });
     blobStream.on("error", (err) => {
@@ -29,11 +38,6 @@ export default class Upload {
       error = true;
       console.log(err);
     });
-    blobStream.end(Buffer.from(fileStream));
-    while (!done) {
-      await new Promise((resolve) => setTimeout(resolve, 10));
-    }
-
     return response.response(
       error
         ? { error: "Error uploading file" }
