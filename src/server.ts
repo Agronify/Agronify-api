@@ -11,6 +11,8 @@ export const init = async (): Promise<Server> => {
           "http://localhost:3000",
           "http://dev.agronify.com",
           "https://dev.agronify.com",
+          "https://bangkit-agronify.et.r.appspot.com",
+          "https://agronify.com",
         ],
         credentials: true,
       },

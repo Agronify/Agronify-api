@@ -14,20 +14,32 @@ export class ModelUtils {
   ) {
     try {
       const tmp_name = `${Date.now()}-model.h5`;
-      let dir = resolve(`./models/${type}/${crop_id}/${model_id}`);
+      let dir = resolve(`./models/${type}/${crop_id}/${model_id}/`);
       try {
         fs.unlinkSync(dir);
-      } catch (error) {}
+      } catch (error) {
+        console.log("Delete error ", error);
+      }
       let extracted = false;
       try {
         bucket
           .file(file)
           .download({ destination: tmp_name }, async function (err) {
+            if (err) {
+              console.log(err);
+            }
             exec(
               "tensorflowjs_converter --input_format=keras " +
                 tmp_name +
                 " " +
-                dir
+                dir,
+              function (err, stdout, stderr) {
+                if (err) {
+                  console.log(err);
+                }
+                console.log(stdout);
+                console.log(stderr);
+              }
             );
           });
       } catch (error) {
@@ -51,46 +63,55 @@ export class ModelUtils {
     crop_id: number,
     model_id: number
   ) {
-    let dir = `./models/${type}/${crop_id}/${model_id}/model.json`;
-    const model = await tf.loadLayersModel(tf.io.fileSystem(dir));
-    const inputHeight = model.getLayer(undefined, 0).batchInputShape[1];
-    const inputWidth = model.getLayer(undefined, 0).batchInputShape[2];
-    const layerAmount = model.layers.length;
-    const classAmount = model.getLayer(undefined, layerAmount - 1).getConfig()
-      .units as number;
-    const modelInfo = {
-      inputHeight,
-      inputWidth,
-      classAmount,
-    };
-    await prisma.mLModel.update({
-      where: {
-        id: model_id,
-      },
-      data: modelInfo,
-    });
+    try {
+      let dir = `./models/${type}/${crop_id}/${model_id}/model.json`;
+      const model = await tf.loadLayersModel(tf.io.fileSystem(dir));
+      const inputHeight = model.getLayer(undefined, 0).batchInputShape[1];
+      const inputWidth = model.getLayer(undefined, 0).batchInputShape[2];
+      const layerAmount = model.layers.length;
+      const classAmount = model.getLayer(undefined, layerAmount - 1).getConfig()
+        .units as number;
+      const modelInfo = {
+        inputHeight,
+        inputWidth,
+        classAmount,
+      };
 
-    const oldClassModel = await prisma.modelClass.findMany({
-      where: {
-        mlmodel_id: model_id,
-      },
-    });
+      console.log("cp info1");
 
-    if (classAmount != oldClassModel.length) {
-      await prisma.modelClass.deleteMany({
+      await prisma.mLModel.update({
+        where: {
+          id: model_id,
+        },
+        data: modelInfo,
+      });
+
+      const oldClassModel = await prisma.modelClass.findMany({
         where: {
           mlmodel_id: model_id,
         },
       });
 
-      for (let i = 0; i < classAmount; i++) {
-        await prisma.modelClass.create({
-          data: {
+      console.log("cp info2");
+
+      if (classAmount != oldClassModel.length) {
+        await prisma.modelClass.deleteMany({
+          where: {
             mlmodel_id: model_id,
-            index: i,
           },
         });
+
+        for (let i = 0; i < classAmount; i++) {
+          await prisma.modelClass.create({
+            data: {
+              mlmodel_id: model_id,
+              index: i,
+            },
+          });
+        }
       }
+    } catch (error) {
+      console.log(error);
     }
   }
 }

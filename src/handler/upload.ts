@@ -8,6 +8,7 @@ export default class Upload {
   public static async upload(request: Request, response: ResponseToolkit) {
     const { file, type } = request.payload as any;
 
+    console.log("cp1");
     const passThrough = new stream.PassThrough();
     passThrough.write(file._data);
     passThrough.end();
@@ -18,13 +19,10 @@ export default class Upload {
     const filename = `${Date.now()}-${file.hapi.filename}`;
     const fullpath = type + "/" + filename;
     const fileStream = bucket.file(fullpath);
-
     const blobStream = passThrough.pipe(fileStream.createWriteStream());
 
-    // const fileStream = fs.readFileSync(file.path);
-    // const blobStream = blob.createWriteStream({
-    //   resumable: false,
-    // });
+    console.log("cp2");
+
     let done = false;
     let error = false;
     blobStream.on("finish", () => {
@@ -38,6 +36,12 @@ export default class Upload {
       error = true;
       console.log(err);
     });
+
+    console.log("cp3");
+
+    while (!done) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
     return response.response(
       error
         ? { error: "Error uploading file" }

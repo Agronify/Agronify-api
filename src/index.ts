@@ -244,10 +244,7 @@ init().then(async (server) => {
     path: "/{any*}",
     handler: function (request, h) {
       const response = h.response();
-      response.header(
-        "Access-Control-Allow-Origin",
-        request.headers.origin || "*"
-      );
+      response.header("Access-Control-Allow-Origin", request.headers.origin);
       response.header(
         "Access-Control-Allow-Methods",
         "POST, GET, PUT, DELETE, OPTIONS"

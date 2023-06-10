@@ -61,7 +61,9 @@ export default class MLModel {
     }
 
     await ModelUtils.downloadModel(file, type, crop_id, res.id, active);
+    console.log("Downloaded");
     await ModelUtils.updateModelInfo(file, type, crop_id, res.id);
+    console.log("Updated");
     res = (await prisma.mLModel.findUnique({
       where: {
         id: res.id,
@@ -71,6 +73,7 @@ export default class MLModel {
   }
 
   public static async put(request: Request, response: ResponseToolkit) {
+    console.log("put");
     const { id } = request.params as any;
     const { name, type, file, active, threshold, normalize, crop_id } =
       request.payload as any;
