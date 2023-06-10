@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: ./Dockerfile
     ports:
-      - 20080:4000
+      - 80:4000
     working_dir: /app
     volumes:
       - ./:/app
