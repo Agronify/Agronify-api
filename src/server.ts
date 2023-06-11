@@ -8,7 +8,7 @@ export const init = async (): Promise<Server> => {
     routes: {
       cors: {
         origin: [
-          "http://localhost:3000",
+          "http://localhost:8080",
           "http://dev.agronify.com",
           "https://dev.agronify.com",
           "https://bangkit-agronify.et.r.appspot.com",

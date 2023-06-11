@@ -22,8 +22,9 @@ export class ModelUtils {
       }
       let extracted = false;
       try {
+        const filenameWithoutBucket = file.split("/").slice(1).join("/");
         bucket
-          .file(file)
+          .file(filenameWithoutBucket)
           .download({ destination: tmp_name }, async function (err) {
             if (err) {
               console.log(err);
@@ -76,8 +77,6 @@ export class ModelUtils {
         inputWidth,
         classAmount,
       };
-
-      console.log("cp info1");
 
       await prisma.mLModel.update({
         where: {

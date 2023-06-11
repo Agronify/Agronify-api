@@ -32,12 +32,11 @@ export default class Crop {
   }
 
   public static async post(request: Request, response: ResponseToolkit) {
-    const { name, type, description, image, is_fruit } = request.payload as any;
+    const { name, type, image, is_fruit } = request.payload as any;
     const res = await prisma.crop.create({
       data: {
         name,
         type,
-        description,
         image,
         is_fruit,
       },
@@ -47,14 +46,13 @@ export default class Crop {
 
   public static async put(request: Request, response: ResponseToolkit) {
     const { id } = request.params as any;
-    const { name, type, description, image, is_fruit } = request.payload as any;
+    const { name, type, image, is_fruit } = request.payload as any;
     const res = await prisma.crop.update({
       where: {
         id: parseInt(id),
       },
       data: {
         name,
-        description,
         image,
         type,
         is_fruit,
