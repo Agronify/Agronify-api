@@ -24,7 +24,6 @@ model Crop {
   name        String
   type        String
   is_fruit    Boolean
-  description String
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @default(now()) @updatedAt
   CropDisease CropDisease[]

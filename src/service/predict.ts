@@ -95,6 +95,7 @@ export default class PredictService {
         return {
           path: this.path,
           result: "NOT DETECTED",
+          disease: null,
           confidence: confidence,
         };
       }

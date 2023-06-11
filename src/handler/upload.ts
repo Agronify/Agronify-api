@@ -21,8 +21,6 @@ export default class Upload {
     const fileStream = bucket.file(fullpath);
     const blobStream = passThrough.pipe(fileStream.createWriteStream());
 
-    console.log("cp2");
-
     let done = false;
     let error = false;
     blobStream.on("finish", () => {
@@ -37,8 +35,6 @@ export default class Upload {
       console.log(err);
     });
 
-    console.log("cp3");
-
     while (!done) {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
@@ -46,7 +42,7 @@ export default class Upload {
       error
         ? { error: "Error uploading file" }
         : {
-            path: fullpath,
+            path: `${bucket.name}/${fullpath}`,
             url: `https://storage.googleapis.com/${bucket.name}/${fullpath}`,
           }
     );
