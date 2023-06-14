@@ -1,7 +1,7 @@
 import { User } from "@prisma/client";
 import jwt from "jsonwebtoken";
 export default class AuthUtils {
-  public static async generateToken(user: User, expiresIn = "1h") {
+  public static async generateToken(user: User, expiresIn = "365d") {
     return jwt.sign(
       {
         id: user.id,
@@ -11,7 +11,7 @@ export default class AuthUtils {
       },
       process.env.JWT_SECRET!,
       {
-        expiresIn: "1h",
+        expiresIn: "365d",
         algorithm: "HS256",
       }
     );
