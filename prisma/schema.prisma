@@ -67,6 +67,7 @@ model ModelClass {
   disease    CropDisease? @relation(fields: [disease_id], references: [id], onDelete: SetNull)
   disease_id Int?
   index      Int
+  ripe       Boolean      @default(false)
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @default(now()) @updatedAt
 }

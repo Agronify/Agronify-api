@@ -28,6 +28,9 @@ export default class PredictService {
           {
             active: true,
           },
+          {
+            type: this.type,
+          }
         ],
       },
     });
@@ -60,7 +63,6 @@ export default class PredictService {
   }
 
   public async predict() {
-    console.log(this.type);
     switch (this.type) {
       case "disease":
         return await this.disease();
@@ -72,7 +74,8 @@ export default class PredictService {
   }
 
   public async disease() {
-    const stream = await bucket.file(this.path).download();
+    const pathWithoutBucket = this.path.split("/").slice(1).join("/");
+    const stream = await bucket.file(pathWithoutBucket).download();
     const mlModel = await this.mlModel;
     const model = await this.model;
     try {
@@ -140,17 +143,59 @@ export default class PredictService {
   }
 
   public async ripeness() {
-    return new Promise((resolve, reject) => {
-      const time = Math.floor(Math.random() * 2000) + 1000;
-      const result = Math.floor(Math.random() * 100) + 1;
-      const confidence = Math.floor(Math.random() * 100) + 1;
-      setTimeout(() => {
-        resolve({
+    const pathWithoutBucket = this.path.split("/").slice(1).join("/");
+    const stream = await bucket.file(pathWithoutBucket).download();
+    const mlModel = await this.mlModel;
+    const model = await this.model;
+    try {
+      const inputHeight = model.getLayer(undefined, 0).batchInputShape[1];
+      const inputWidth = model.getLayer(undefined, 0).batchInputShape[2];
+      const bufferResize = await sharp(stream[0])
+        .resize(inputHeight, inputWidth)
+        .toBuffer();
+      let tensor = tf.node
+        .decodeImage(bufferResize, 3)
+        .reshape([1, inputHeight!, inputWidth!, 3]);
+
+      if (mlModel?.normalize) tensor = tensor.div(tf.scalar(255));
+
+      let prediction = model.predict(tensor) as tf.Tensor<tf.Rank>;
+      const result = prediction.argMax(1).dataSync()[0];
+      const confidence = prediction.max(1).dataSync()[0] * 100;
+
+      const modelClasses = await prisma.modelClass.findMany({
+        where: {
+          AND: [
+            {
+              mlmodel_id: mlModel?.id,
+            },
+          ],
+        }
+      });
+      
+      const mcResult = modelClasses.find((modelClass) => {
+        return modelClass.index === result;
+      });
+
+      if (mlModel?.threshold && confidence < mlModel?.threshold) {
+        return {
           path: this.path,
-          result: result < 20 ? "unripe" : result > 80 ? "too ripe" : "ripe",
+          result: "NOT DETECTED",
           confidence: confidence,
-        });
-      }, time);
-    });
+        };
+      }
+
+      return {
+        path: this.path,
+        result: mcResult?.ripe ? "RIPE" : "UNRIPE",
+        confidence: confidence,
+      };
+    } catch (error: any) {
+      console.log(error.message);
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
   }
 }

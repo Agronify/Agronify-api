@@ -70,7 +70,7 @@ export class ModelClass {
   }
 
   public static async put(request: Request, response: ResponseToolkit) {
-    const { disease_id, index } = request.payload as any;
+    const { disease_id, ripe, index } = request.payload as any;
     const { mlmodel_id, id } = request.params as any;
     const model = await prisma.mLModel.findUnique({
       where: {
@@ -96,6 +96,7 @@ export class ModelClass {
                 },
               }
             : undefined,
+        ripe,
       },
     });
 
@@ -105,7 +106,6 @@ export class ModelClass {
       ]);
       await prisma.$executeRaw(sql);
     }
-
     return res;
   }
 

@@ -16,7 +16,7 @@ import User from "./handler/user";
 import { GuardService } from "./service/guard";
 
 export const prisma = new PrismaClient({
-  log: [], //["query", "info", "warn", "error"],
+  log: ["query", "info", "warn", "error"],
 });
 
 export const storage = new Storage({ keyFilename: "./google-cloud-key.json" });

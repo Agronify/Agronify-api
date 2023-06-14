@@ -1,5 +1,6 @@
 import { Request, ResponseToolkit } from "@hapi/hapi";
 import { prisma } from "..";
+import { rsqrt } from "@tensorflow/tfjs-node";
 export default class Crop {
   public static async get(request: Request, response: ResponseToolkit) {
     const { id } = request.params as any;
@@ -27,7 +28,7 @@ export default class Crop {
       });
       return res;
     }
-    res = prisma.crop.findMany();
+    res = await prisma.crop.findMany();
     return res;
   }
 
