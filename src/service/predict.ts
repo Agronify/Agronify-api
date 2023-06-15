@@ -97,7 +97,7 @@ export default class PredictService {
       if (mlModel?.threshold && confidence < mlModel?.threshold) {
         return {
           path: this.path,
-          result: "NOT DETECTED",
+          result: "Not Detected",
           disease: null,
           confidence: confidence,
         };
@@ -180,14 +180,14 @@ export default class PredictService {
       if (mlModel?.threshold && confidence < mlModel?.threshold) {
         return {
           path: this.path,
-          result: "NOT DETECTED",
+          result: "Not Detected",
           confidence: confidence,
         };
       }
 
       return {
         path: this.path,
-        result: mcResult?.ripe ? "RIPE" : "UNRIPE",
+        result: mcResult?.ripe ? "Ripe" : "Unripe",
         confidence: confidence,
       };
     } catch (error: any) {
