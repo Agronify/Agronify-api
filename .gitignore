@@ -2,3 +2,4 @@ node_modules
 google-cloud-key.json
 models
 build
+.env
