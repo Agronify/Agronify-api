@@ -27,4 +27,5 @@ Api documentation is available on Postman, please click the following button to 
 4. Copy `.env.example` to `.env` and fill the environment variables with your own
 5. Run `docker-compose up -d` to run the server
 6. Server will be running on port `20080` (main branch) or `80` (production branch)
+7. Default email and password is `admin@agronify.com` and `admin123`
 7. You'll need to add crop, crop disease, ml model, and model class mapping before doing any prediction.
