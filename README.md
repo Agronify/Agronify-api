@@ -29,4 +29,4 @@ To run image in container:
 ```
 docker compose up 
 ```
-This will create container that exposing port 20080 (master branch) or 80 (production branch)
+This will create container that exposing port 20080 (main branch) or 80 (production branch)
