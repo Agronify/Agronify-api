@@ -14,15 +14,17 @@ Api documentation is available on Postman, please click the following button to 
 
 [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/25099554-02aaef01-48f5-43cb-ad27-8bc280db4294?action=collection%2Ffork&source=rip_markdown&collection-url=entityId%3D25099554-02aaef01-48f5-43cb-ad27-8bc280db4294%26entityType%3Dcollection%26workspaceId%3D4687e208-3e5b-4cd9-96d2-5816e844de18)
 
-# Installation
-This repository is ready to be installed using docker compose, please ensure you have google-cloud-key.json in root project directory and add .env based on .env.example
+# Prerequisites
+- Docker
+- Docker Compose
+- Postgresql Database
 
-To build image:
-```
-docker compose build
-```
-To run image in container:
-```
-docker compose up 
-```
-This will create container that exposing port 20080 (master branch) or 80 (production branch)
+# How to run
+
+1. Clone this repository
+2. Create postgresql database with the name `agronify`
+3. Insert `agronify.sql` to the database
+4. Copy `.env.example` to `.env` and fill the environment variables with your own
+5. Run `docker-compose up -d` to run the server
+6. Server will be running on port `20080` (main branch) or `80` (production branch)
+7. You'll need to add crop, crop disease, ml model, and model class mapping before doing any prediction.
