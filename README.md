@@ -8,10 +8,6 @@ This project is built with the following tech stack and libraries :
 - HapiJs
 - PostgreSQL
 - TensorflowJS
-- RTK Query
-- React
-- Tailwind CSS
-- Material UI 
 
 # Api Documentation : 
 Api documentation is available on Postman, please click the following button to view the documentation :
