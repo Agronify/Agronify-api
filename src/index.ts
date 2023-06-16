@@ -43,7 +43,6 @@ init().then(async (server) => {
   server.auth.default("jwt");
 
   server.state("token", {
-    ttl: 1 * 60 * 60 * 1000,
     isSecure: true,
     isHttpOnly: true,
     encoding: "none",
